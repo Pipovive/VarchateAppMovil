@@ -1,13 +1,9 @@
-import React from 'react'
-import { Text, View } from 'react-native'
+import { Redirect } from "expo-router"
 
 
 const App = () => {
-  return (
-    <View>
-      <Text>App</Text>
-    </View>
-  )
+  // return <Redirect href='/(stack)/carrusel'></Redirect>
+  return <Redirect href='/(tabs)/home'></Redirect>
 }
 
 export default App
