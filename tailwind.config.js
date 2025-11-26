@@ -25,8 +25,9 @@ module.exports = {
         200: '#424542',
         300: '#343734'
       },
-      'tertiary': '#5B68F0',
+      'tertiary': '#E67F76',
       'quaternary': '#FFFFFF'
+      
     },
 
     extend: {},
