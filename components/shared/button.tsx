@@ -9,11 +9,18 @@ interface props extends PressableProps {
     className?: string;
     font?:  'medium' | 'bold' | 'extraBold';
     source?: {};
+    textPos?: 'left' | 'right' | 'center';   
 
 }
 
-const Button = ({children, color='primary', variant='contained', className, onPress, font='bold', source}:props) => {
-const btnColor = {
+const Button = ({children, color='primary', variant='contained', className, onPress, font='bold', source, textPos='center'}:props) => {
+    const txtPos = {
+        left:'text-left',
+        right: 'text-right',
+        center: 'text-center'
+    }[textPos];
+
+    const btnColor = {
     primary : 'bg-primary',
     secondary : 'bg-secondary',
     tertiary : 'bg-tertiary',
@@ -38,7 +45,7 @@ const btnFont = {
             <Pressable className={`p-3 ${className}`}
                 onPress={onPress}
             >
-                <Text className={`text-center color-primary-100 ${btnFont}`}>{children}</Text>
+                <Text className={`${txtPos} color-primary-200 ${btnFont}`}>{children}</Text>
             </Pressable>
         )
     } else if (variant === 'facebook') {
@@ -46,7 +53,7 @@ const btnFont = {
         <Pressable className={`p-3 rounded-md border-primary-200 border-2 active:opacity-90 ${className}`}
             onPress={onPress}
         >
-            <Text className={`text-center color-primary-200 ${btnFont}`}>{children}</Text>
+            <Text className={`${txtPos} color-primary-200 ${btnFont}`}>{children}</Text>
         </Pressable>
         )
     } else if (variant === 'google') {
@@ -54,7 +61,7 @@ const btnFont = {
         <Pressable className={`p-3 rounded-md border-tertiary border-2 active:opacity-90 ${className}`}
             onPress={onPress}
         >
-            <Text className={`text-center color-tertiary ${btnFont}`}>{children}</Text>
+            <Text className={`${txtPos} color-tertiary ${btnFont}`}>{children}</Text>
         </Pressable>
         )
     } else if (variant === 'card') {
@@ -66,7 +73,7 @@ const btnFont = {
                 source={source}
                 style={{width:100, height:100}} 
             />
-            <Text className={`text-center ${btnText} ${btnFont}`}>{children}</Text>
+            <Text className={`${txtPos} ${btnText} ${btnFont}`}>{children}</Text>
         </Pressable>
   )
     }
@@ -75,7 +82,7 @@ const btnFont = {
     <Pressable className={`p-3 rounded-md ${btnColor} active:opacity-90 ${className}`}
         onPress={onPress}
         >
-        <Text className={`text-center ${btnText} ${btnFont}`}>{children}</Text>
+        <Text className={`${txtPos} ${btnText} ${btnFont}`}>{children}</Text>
     </Pressable>
   )
 }
