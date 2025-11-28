@@ -82,7 +82,7 @@ const btnFont = {
     <Pressable className={`p-3 rounded-md ${btnColor} active:opacity-90 ${className}`}
         onPress={onPress}
         >
-        <Text className={`${txtPos} ${btnText} ${btnFont}`}>{children}</Text>
+        <Text className={`text-lg ${txtPos} ${btnText} ${btnFont}`}>{children}</Text>
     </Pressable>
   )
 }

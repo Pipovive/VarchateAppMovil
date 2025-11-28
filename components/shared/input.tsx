@@ -25,7 +25,7 @@ const Input = ( {label, error, ...rest} : props) => {
                 />
             </View>
             {error && (
-                <Text className='mt-1 text-left text-xs text-tertiary'>{error}</Text>
+                <Text className='mt-1 font-barlow-medium text-left text-sm text-tertiary'>{error}</Text>
             )}
         </View>
      
