@@ -66,14 +66,18 @@ const btnFont = {
         )
     } else if (variant === 'card') {
         return (
-        <Pressable className={`mx-4 my-6 p-3  active:opacity-90 ${className}`}
+        <Pressable className={`my-4 p-3 active:opacity-90 ${className} `}
             onPress={onPress}
         >
             <Image 
                 source={source}
-                style={{width:100, height:100}} 
+                style={{width: "60%",
+                height: "60%",
+                resizeMode: "contain",
+                marginBottom: 15,
+            }} 
             />
-            <Text className={`${txtPos} ${btnText} ${btnFont}`}>{children}</Text>
+            <Text className={`${txtPos} text-black ${btnFont} `}>{children}</Text>
         </Pressable>
   )
     }
