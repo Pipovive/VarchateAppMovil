@@ -58,6 +58,7 @@ const LoginScreen = () => {
       <Button variant='text-only' textPos='center' onPress={() => {router.push('/(stack)/register')}}>Regístrate</Button>
       </View>
     </>
+
   )
 }
 

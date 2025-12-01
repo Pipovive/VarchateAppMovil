@@ -1,12 +1,14 @@
+import { router } from 'expo-router'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
 const CarruselScreen = () => {
   return (
     <View>
-      <Text>CarruselScreen
-    
-      </Text>
+      <Text>CarruselScreen</Text>
+      <Pressable onPress={() => router.push('/(stack)/login')}>
+        <Text>Go to Login</Text>
+      </Pressable>
     </View>
   )
 }
