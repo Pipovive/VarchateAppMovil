@@ -4,7 +4,7 @@ import React from 'react';
 
 const TabsLayout = () => {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }}>
+    <Tabs screenOptions={{ tabBarActiveTintColor: 'primary' }}>
       <Tabs.Screen
         name="home/index"
         options={{
