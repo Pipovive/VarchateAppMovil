@@ -71,8 +71,8 @@ const btnFont = {
         >
             <Image 
                 source={source}
-                style={{width: "60%",
-                height: "60%",
+                style={{width: "50%",
+                height: "50%",
                 resizeMode: "contain",
                 marginBottom: 15,
             }} 
@@ -86,7 +86,7 @@ const btnFont = {
     <Pressable className={`p-3 rounded-md ${btnColor} active:opacity-90 ${className}`}
         onPress={onPress}
         >
-        <Text className={`${txtPos} ${btnText} ${btnFont} `}>{children}</Text>
+        <Text className={`text-lg ${txtPos} ${btnText} ${btnFont}`}>{children}</Text>
     </Pressable>
   )
 }

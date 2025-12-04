@@ -1,17 +1,18 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Image } from 'react-native';
 
 const TabsLayout = () => {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-         tabBarStyle: {
-          backgroundColor: '#0099FF',   // ← barra azul
-          },
-          tabBarActiveTintColor: '#FFFFFF',   // iconos blancos cuando están activos
-          tabBarInactiveTintColor: '#FFFFFF', // iconos blancos cuando NO están activos
+        tabBarStyle: {
+          backgroundColor: '#276CDC',   // ← barra azul
+        },
+        tabBarActiveTintColor: '#FFFFFF',
+        tabBarInactiveTintColor: '#FFFFFF',
       }}
     >
       <Tabs.Screen
@@ -45,8 +46,17 @@ const TabsLayout = () => {
         name="profile/index"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) =>
-            <FontAwesome size={28} name="user" color={color} />,
+          tabBarIcon: ({  size }) => (
+            <Image
+              source={require('../../assets/images/foto-perfil.png')}
+              style={{
+                width: size,
+                height: size,
+                borderRadius: 50,
+                borderColor: 'white'
+              }}
+            />
+          ),  
         }}
       />
     </Tabs>

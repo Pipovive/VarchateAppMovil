@@ -4,43 +4,52 @@ import React from 'react'
 const StackLayout = () => {
   return (
     <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: {
-          backgroundColor: 'white'
-        }
-      }}
-    >
-      <Stack.Screen
+        screenOptions={{
+            headerShown: false,
+            contentStyle: {
+                backgroundColor: 'white'
+            }
+        }        
+        }>
+            
+        <Stack.Screen
         name='carrusel/index'
-        options={{ title: 'Carrusel' }}
-      />
+        options={{
+            title: 'Carrusel'
 
-      <Stack.Screen
+        }}/>
+        
+        <Stack.Screen
         name='register/index'
-        options={{ title: 'Register' }}
-      />
+        options={{
+            title: 'Register'
 
-      <Stack.Screen
+        }}/>
+        
+        <Stack.Screen
         name='terms/index'
-        options={{ title: 'Terms and Conditions' }}
-      />
+        options={{
+            title: 'Terms and Conditions'
 
-      <Stack.Screen
+        }}/>
+
+        <Stack.Screen
         name='login/index'
-        options={{ title: 'Login' }}
-      />
+        options={{
+            title: 'Login'
 
-      <Stack.Screen
+        }}/>
+
+        <Stack.Screen
         name='forgotPassword/index'
-        options={{ title: 'Forgot Password' }}
-      />
+        options={{
+            title: 'Forgot Password'
 
-     
-      <Stack.Screen
-        name='competition/[language]'
-        options={{ title: 'Competition' }}
-      />
+        }}/>
+        
+
+
+
     </Stack>
   )
 }
