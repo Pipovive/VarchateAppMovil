@@ -47,6 +47,13 @@ const StackLayout = () => {
 
         }}/>
         
+        <Stack.Screen
+        name='home/index'
+        options={{
+            title: 'home'
+
+        }}/>
+        
 
 
 
