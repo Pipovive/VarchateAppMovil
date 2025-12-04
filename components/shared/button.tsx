@@ -71,8 +71,8 @@ const btnFont = {
         >
             <Image 
                 source={source}
-                style={{width: "60%",
-                height: "60%",
+                style={{width: "50%",
+                height: "50%",
                 resizeMode: "contain",
                 marginBottom: 15,
             }} 

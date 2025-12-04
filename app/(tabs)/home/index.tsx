@@ -22,7 +22,7 @@ const HomeScreen = () => {
         <Button 
           variant="card"
           color="secondary"
-          className="w-[48%] aspect-square bg-[#AFCBFF7D] rounded-2xl items-center justify-center shadow-md"
+          className="w-[45%] aspect-square p-1 bg-[#AFCBFF7D] rounded-xl items-center justify-center  shadow-md"
           source={require("../../../assets/images/diagrama-de-flujo.png")}
         >
           INTRODUCCION A LA PROGRAMACION
@@ -31,7 +31,7 @@ const HomeScreen = () => {
         <Button 
           variant="card"
           color="secondary"
-          className="w-[48%] aspect-square bg-[#AFCBFF7D] rounded-2xl items-center justify-center shadow-md"
+          className="w-[45%] aspect-square p-1 bg-[#AFCBFF7D] rounded-xl items-center justify-center  shadow-md"
           source={require("../../../assets/images/html-5.png")}
         >
           HTML
@@ -40,7 +40,7 @@ const HomeScreen = () => {
         <Button 
           variant="card"
           color="secondary"
-          className="w-[48%] aspect-square bg-[#AFCBFF7D] rounded-2xl items-center justify-center shadow-md"
+          className="w-[45%] aspect-square p-1 bg-[#AFCBFF7D] rounded-xl items-center justify-center  shadow-md"
           source={require("../../../assets/images/css-3.png")}
         >
           CSS
@@ -49,7 +49,7 @@ const HomeScreen = () => {
         <Button 
           variant="card"
           color="primary"
-          className="w-[48%] aspect-square bg-[#AFCBFF7D] rounded-2xl items-center justify-center shadow-md"
+          className="w-[45%] aspect-square p-1 bg-[#AFCBFF7D] rounded-xl items-center justify-center  shadow-md"
           source={require("../../../assets/images/javascript.png")}
         >
           JAVASCRIPT
@@ -58,7 +58,7 @@ const HomeScreen = () => {
         <Button 
           variant="card"
           color="primary"
-          className="w-[48%] aspect-square bg-[#AFCBFF7D] rounded-2xl items-center justify-center shadow-md"
+          className="w-[45%] aspect-square p-1 bg-[#AFCBFF7D] rounded-xl items-center justify-center  shadow-md"
           source={require("../../../assets/images/sql.png")}
         >
           SQL
@@ -67,7 +67,7 @@ const HomeScreen = () => {
         <Button 
           variant="card"
           color="primary"
-          className="w-[48%] aspect-square bg-[#AFCBFF7D] rounded-2xl items-center justify-center shadow-md"
+          className="w-[45%] aspect-square p-1 bg-[#AFCBFF7D] rounded-xl items-center justify-center  shadow-md"
           source={require("../../../assets/images/php.png")}
         >
           PHP
