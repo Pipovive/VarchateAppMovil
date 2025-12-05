@@ -38,10 +38,11 @@ module.exports = {
         900: '#D1D5DB',      // gris 200
         950: '#D9D9D9'
       },
-      'danger': {
+      'tertiary': {
       DEFAULT: '#D64545',
       100: '#C5221F',
-      200: '#C00F0C'
+      200: '#C00F0C',
+      300: '#FFE5E5'
       },
 
       'quaternary': '#FFFFFF'

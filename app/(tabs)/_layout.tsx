@@ -43,7 +43,7 @@ const TabsLayout = () => {
       />
 
       <Tabs.Screen
-        name="profile/index"
+        name="(stack)"
         options={{
           title: 'Profile',
           tabBarIcon: ({  size }) => (

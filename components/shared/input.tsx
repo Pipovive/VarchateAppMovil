@@ -13,7 +13,7 @@ const Input = ( {label, error, ...rest} : props) => {
   return (
         <View className='w-full mb-4'>
             {label && (
-                <Text className='mb-1 text-sm font-barlow-medium text-secondary-100'>
+                <Text className='mb-1 text-sm font-barlow-medium text-secondary'>
                     {label}
                 </Text>
             )}

@@ -1,19 +1,23 @@
 import React from 'react';
-import { Image, Pressable, PressableProps, Text } from 'react-native';
+import { Image, Pressable, PressableProps, Text, View } from 'react-native';
 
 
 interface props extends PressableProps {
-    children : string;
+    children ?: string;
     color?: 'primary' | 'secondary' | 'tertiary' | 'quaternary';
-    variant?: 'contained' | 'facebook' | 'google' | 'text-only' | 'card'; 
+    variant?: 'contained' | 'facebook' | 'google' | 'text-only' | 'card' | 'toggle'; 
     className?: string;
     font?:  'medium' | 'bold' | 'extraBold';
     source?: {};
-    textPos?: 'left' | 'right' | 'center';   
+    textPos?: 'left' | 'right' | 'center';
+    value ?: boolean;   
+    textColor ?: 'normal' | 'link';
+    
+
 
 }
 
-const Button = ({children, color='primary', variant='contained', className, onPress, font='bold', source, textPos='center'}:props) => {
+const Button = ({children, color='primary', variant='contained', className, onPress, font='bold', source, textPos='center', value, textColor='link'}:props) => {
     const txtPos = {
         left:'text-left',
         right: 'text-right',
@@ -45,7 +49,7 @@ const btnFont = {
             <Pressable className={`p-3 ${className}`}
                 onPress={onPress}
             >
-                <Text className={`${txtPos} color-primary-200 ${btnFont}`}>{children}</Text>
+                <Text className={`${txtPos} ${textColor != 'link' ? 'color-secondary-600' : ' color-primary-200'} ${btnFont}`}>{children}</Text>
             </Pressable>
         )
     } else if (variant === 'facebook') {
@@ -80,8 +84,19 @@ const btnFont = {
             <Text className={`${txtPos} text-black ${btnFont} `}>{children}</Text>
         </Pressable>
   )
-    }
+    } else if (variant === 'toggle') {
+        return (
+        <Pressable className={`h-10 mr-2 w-20 flex-row rounded-full p-1 ${value ? 'bg-primary-100' : 'bg-secondary-100'} `}
+            onPress={onPress}
+        >
+        
+           <View className={`w-8 h-8 rounded-full bg-quaternary ${value ? 'ml-10' : 'ml-0'}`}></View>
 
+           {/* <Text className='text-sm'>{value ? 'Light' : 'Dark'}</Text> */}
+
+        </Pressable>
+    )
+}
   return (
     <Pressable className={`p-3 rounded-md ${btnColor} active:opacity-90 ${className}`}
         onPress={onPress}
