@@ -5,6 +5,7 @@ import { Image } from 'react-native';
 
 const TabsLayout = () => {
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -15,6 +16,8 @@ const TabsLayout = () => {
         tabBarInactiveTintColor: '#FFFFFF',
       }}
     >
+
+     
       <Tabs.Screen
         name="home/index"
         options={{
@@ -42,6 +45,13 @@ const TabsLayout = () => {
         }}
       />
 
+      <Tabs.Screen 
+      name="(stack)"
+      options={{
+        href: null
+      }}
+      />
+
       <Tabs.Screen
         name="profile/index"
         options={{
@@ -60,6 +70,8 @@ const TabsLayout = () => {
         }}
       />
     </Tabs>
+   
+    </>
   );
 };
 

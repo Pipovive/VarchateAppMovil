@@ -9,7 +9,7 @@ const HomeScreen = () => {
 
   const goToCompetition = (language: string) => {
  router.push({
-  pathname: "/(stack)/competition/[language]",
+  pathname: "../(stack)/competition/[language]",
   params: { language }
 });
   };
