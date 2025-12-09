@@ -17,10 +17,10 @@ const HomeScreen = () => {
   const router = useRouter()
 
   const goToCompetition = (language: string) => {
-    router.push({
-      pathname: "/(stack)/competition/[language]",
-      params: { language }
-    });
+ router.push({
+  pathname: "../(stack)/competition/[language]",
+  params: { language }
+});
   };
 
   return (

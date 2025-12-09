@@ -1,9 +1,9 @@
 import { Stack } from 'expo-router'
 import React from 'react'
 
-const StackProfile = () => {
+export default function StackViews() {
   return (
-<Stack
+    <Stack
         screenOptions={{
             headerShown: false,
             contentStyle: {
@@ -13,15 +13,12 @@ const StackProfile = () => {
         }>
             
         <Stack.Screen
-        name='profile/index'
+        name='competition/[language]/index'
         options={{
-            title: 'Profile'
-
+            title: "Competition" 
         }}/>
         
 
     </Stack>
   )
 }
-
-export default StackProfile

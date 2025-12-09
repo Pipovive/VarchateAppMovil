@@ -1,10 +1,12 @@
+import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { IntroText } from "../../../../components/IntroText";
-import { LessonCard } from "../../../../components/LessonCard";
-import { ModuleHeader } from "../../../../components/ModuleHeader";
-import { TopProgressHeader } from "../../../../components/TopProgressHeader";
+import { IntroText } from "../../../../../components/IntroText";
+import { LessonCard } from "../../../../../components/LessonCard";
+import { ModuleHeader } from "../../../../../components/ModuleHeader";
+import { TopProgressHeader } from "../../../../../components/TopProgressHeader";
+import { WhiteScreenContainer } from "../../../../../components/WhiteScreenContainer";
 
 export default function CompetitionLanguageScreen() {
   const lessons = [
@@ -33,41 +35,47 @@ export default function CompetitionLanguageScreen() {
         "Pondrás en práctica los fundamentos de programación con ejercicios sencillos.",
     },
   ];
-
+  const { language } = useLocalSearchParams<{ language: string }>();
   return (
-    <SafeAreaView className="flex-1 bg-quaternary">
-      <ScrollView>
-
+     <SafeAreaView className="flex-1" >
+        <ScrollView 
+        className="flex-1 bg-[#EAF4FF]"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        >
+      
         {/* HEADER */}
         <TopProgressHeader
           title="INTRODUCCION A LA PROGRAMACION"
           progress={69}
+          activeLanguage={language}
         />
 
-        <View className="px-4 py-6">
+        <WhiteScreenContainer>
           <ModuleHeader />
           <IntroText />
 
-          <Text className="text-2xl font-barlow-extraBold text-secondary mt-6 mb-4">
+          <Text className="text-2xl font-barlow-bold text-secondary mt-6 mb-4">
             Contenido
           </Text>
 
-          <View className="space-y-4">
+          
             {lessons.map((lesson, index) => (
-              <LessonCard
-                key={index}
-                title={lesson.title}
-                desc={lesson.desc}
-              />
-            ))}
-          </View>
+              <View key={index} className="mb-4">
+                <LessonCard
+                  title={lesson.title}
+                  desc={lesson.desc}
+                />
+              </View>
+              ))}
+          
 
-          <TouchableOpacity className="bg-primary mt-8 py-4 rounded-2xl">
-            <Text className="text-center text-quaternary font-barlow-bold text-lg">
+          <TouchableOpacity className="bg-primary-200 mt-8 py-4 w-40 self-end rounded-2xl">
+            <Text className="text-center text-quaternary font-barlow-bold text-xl">
               Siguiente
             </Text>
           </TouchableOpacity>
-        </View>
+       </WhiteScreenContainer>
       </ScrollView>
     </SafeAreaView>
   );
