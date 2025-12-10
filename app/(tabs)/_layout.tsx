@@ -9,7 +9,7 @@ const TabsLayout = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#276CDC',   // ← barra azul
+          backgroundColor: '#276CDC',
         },
         tabBarActiveTintColor: '#FFFFFF',
         tabBarInactiveTintColor: '#FFFFFF',
@@ -46,7 +46,7 @@ const TabsLayout = () => {
         name="(stack)"
         options={{
           title: 'Profile',
-          tabBarIcon: ({  size }) => (
+          tabBarIcon: ({ size }) => (
             <Image
               source={require('../../assets/images/foto-perfil.png')}
               style={{
@@ -56,9 +56,11 @@ const TabsLayout = () => {
                 borderColor: 'white'
               }}
             />
-          ),  
+          ),
         }}
       />
+
+
     </Tabs>
   );
 };

@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { router, useNavigation } from 'expo-router';
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+
 
 type Props = {
   title: string;
@@ -25,6 +27,10 @@ export function TopProgressHeader({ title, progress, activeSlug }: Props) {
 
     router.replace(`/(tabs)/competition/${slug}`);
   };
+
+  const navigation = useNavigation<DrawerNavigationProp<any>>();
+  
+
 
   return (
     <>
@@ -68,6 +74,7 @@ export function TopProgressHeader({ title, progress, activeSlug }: Props) {
           <TouchableOpacity
             className="w-12 h-12 bg-quaternary rounded-2xl items-center justify-center mr-4"
             style={{ elevation: 4 }}
+            onPress={() => navigation.openDrawer() }
           >
             <Ionicons name="menu" size={28} color="#0099FF" />
           </TouchableOpacity>

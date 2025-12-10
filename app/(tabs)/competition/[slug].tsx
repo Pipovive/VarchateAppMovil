@@ -1,12 +1,14 @@
-import { TopProgressHeader } from ".../../../components/shared/headerProgress";
-import { LessonCard } from ".../../../components/shared/lessonCard";
+import { TopProgressHeader } from "@/components/shared/headerProgress";
 import { IntroText } from "@/components/shared/introText";
+import { LessonCard } from "@/components/shared/lessonCard";
+import { ModuleHeader } from "@/components/shared/moduleHeader";
 import { WhiteScreenContainer } from "@/components/shared/whiteScreenCard";
 import { useLocalSearchParams } from "expo-router";
 
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 export default function CompetitionScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -61,7 +63,7 @@ export default function CompetitionScreen() {
         <TopProgressHeader
           title={title}
           progress={69}
-          activeLanguage={slug}
+          activeSlug={slug as string}
         />
 
         <WhiteScreenContainer>
