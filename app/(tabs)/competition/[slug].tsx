@@ -1,12 +1,12 @@
 import { TopProgressHeader } from ".../../../components/shared/headerProgress";
 import { LessonCard } from ".../../../components/shared/lessonCard";
+import { IntroText } from "@/components/shared/introText";
+import { WhiteScreenContainer } from "@/components/shared/whiteScreenCard";
 import { useLocalSearchParams } from "expo-router";
+
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { WhiteScreenContainer } from "../../../../../components/WhiteScreenContainer";
-import { IntroText } from "../../../../components/IntroText";
 
 export default function CompetitionScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();

@@ -6,10 +6,10 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 type Props = {
   title: string;
   progress: number;
-  activeSlug: string; // 🔥 CAMBIADO
+  activeSlug: string; // 🔥 SLUG ACTIVO
 };
 
-// 🔥 Tus competencias deben tener KEY = slug real
+// 🔥 Lista de competencias con su slug real
 const COMPETENCIAS = [
   { slug: "intro-programacion", label: "INTRODUCCIÓN A LA PROGRAMACIÓN" },
   { slug: "html", label: "HTML" },
@@ -21,7 +21,7 @@ const COMPETENCIAS = [
 
 export function TopProgressHeader({ title, progress, activeSlug }: Props) {
   const navigateTo = (slug: string) => {
-    if (slug === activeSlug) return;
+    if (slug === activeSlug) return; // evita navegación duplicada
 
     router.replace(`/(tabs)/competition/${slug}`);
   };
@@ -31,10 +31,10 @@ export function TopProgressHeader({ title, progress, activeSlug }: Props) {
       {/* PROGRESS BAR */}
       <View className="w-full bg-primary-100 px-4 pt-6 pb-2">
         <View className="flex-row items-center mb-3">
-          
+
           {/* REGRESAR */}
-          <TouchableOpacity 
-            className="mr-4" 
+          <TouchableOpacity
+            className="mr-4"
             onPress={() => router.replace("/(tabs)/home")}
           >
             <Ionicons name="arrow-back" size={28} color="#FFFFFF" />
@@ -72,7 +72,7 @@ export function TopProgressHeader({ title, progress, activeSlug }: Props) {
             <Ionicons name="menu" size={28} color="#0099FF" />
           </TouchableOpacity>
 
-          {/* PILLS DE COMPETENCIAS */}
+          {/* PILLS */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
