@@ -25,7 +25,7 @@ export function TopProgressHeader({ title, progress, activeSlug }: Props) {
   const navigateTo = (slug: string) => {
     if (slug === activeSlug) return; // evita navegación duplicada
 
-    router.replace(`/(tabs)/competition/${slug}`);
+    router.replace(`/(tabs)/(drawer)/competition/${slug}`);
   };
 
   const navigation = useNavigation<DrawerNavigationProp<any>>();

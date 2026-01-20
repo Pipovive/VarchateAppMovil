@@ -1,4 +1,3 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Image } from 'react-native';
@@ -9,18 +8,39 @@ const TabsLayout = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#276CDC',
+          backgroundColor: '#0099FF',
+          paddingHorizontal: 20,
+          borderTopWidth: 0, // Elimina borde superior
+          elevation: 0, // Elimina sombra en Android
+          shadowOpacity: 0, // Elimina sombra en iOS
+        },
+        tabBarItemStyle: {
+          gap: 10,
         },
         tabBarActiveTintColor: '#FFFFFF',
         tabBarInactiveTintColor: '#FFFFFF',
+
       }}
     >
       <Tabs.Screen
         name="home/index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) =>
-            <FontAwesome size={28} name="home" color={color} />,
+          title: 'Módulos',
+          tabBarLabelStyle: {
+            color: '#FFFFFF',
+            fontSize: 12,
+            fontWeight: '500',
+          },
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require('../../assets/images/VA.png')}
+              style={{
+                width:  focused ? 28 : 24,
+                height:  focused ? 28 : 24,
+                resizeMode: 'contain',
+              }}
+            />
+          )
         }}
       />
 
@@ -28,35 +48,68 @@ const TabsLayout = () => {
         name="editor/index"
         options={{
           title: 'Editor',
-          tabBarIcon: ({ color }) =>
-            <FontAwesome size={28} name="code" color={color} />,
+          tabBarLabelStyle: {
+            color: '#FFFFFF',
+            fontSize: 12,
+            fontWeight: '500',
+          },
+          tabBarIcon: ({  focused }) => (
+            <Image
+              source={require('../../assets/images/codeW.png')}
+              style={{
+                width:  focused ? 28 : 24,
+                height:  focused ? 28 : 24 ,
+                resizeMode: 'contain',
+              }}
+            />
+          )
         }}
       />
 
       <Tabs.Screen
         name="chatbot/index"
         options={{
-          title: 'Chatbot',
-          tabBarIcon: ({ color }) =>
-            <FontAwesome size={28} name="wechat" color={color} />,
+          title: 'Pregúntar',
+          tabBarLabelStyle: {
+            color: '#FFFFFF',
+            fontSize: 12,
+            fontWeight: '500',
+          },
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require('../../assets/images/iaW.png')}
+              style={{
+                width:  focused ? 28 : 24 ,
+                height:  focused ? 28 : 24 ,
+                resizeMode: 'contain',
+              }}
+            />
+          )
         }}
       />
 
       <Tabs.Screen
         name="(stack)"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ size }) => (
+          title: 'Perfil',
+          tabBarIcon: ({  }) => (
             <Image
               source={require('../../assets/images/foto-perfil.png')}
               style={{
-                width: size,
-                height: size,
+                width:  24,
+                height:  24, 
                 borderRadius: 50,
                 borderColor: 'white'
               }}
             />
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="(drawer)"
+        options={{
+          href: null,
         }}
       />
 
