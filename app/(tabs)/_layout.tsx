@@ -45,7 +45,7 @@ const TabsLayout = () => {
       />
 
       <Tabs.Screen
-        name="editor/index"
+        name="editor"
         options={{
           title: 'Editor',
           tabBarLabelStyle: {

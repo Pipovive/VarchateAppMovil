@@ -72,7 +72,7 @@ function CustomContent(props: DrawerContentComponentProps) {
       {/* HEADER DEL DRAWER */}
       <SafeAreaView>
       {/* SECCIÓN: CONTENIDO DEL CURSO */}
-      <View className="px-4">
+      <View className="pt-6 px-4">
         <Text className="font-barlow-semibold text-sm text-gray-600 mb-3 px-2">
           CONTENIDO DEL CURSO
         </Text>
