@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { JSX, useState } from 'react';
+import { useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -7,61 +7,116 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 type TabKey = 'html' | 'css' | 'js' | 'run';
 
-export default function CodeEditor(): JSX.Element {
+export default function CodeEditor() {
   const [activeTab, setActiveTab] = useState<TabKey>('html');
 
-  const [html, setHtml] = useState<string>(
-    '<!DOCTYPE html>\n<html>\n<head>\n  <title>Mi primera página</title>\n</head>\n<body>\n  <h1>Hola Mundo</h1>\n</body>\n</html>'
-  );
+  const [html, setHtml] = useState<string>(`<h1>Hola Mundo</h1>
+<p>Edita el HTML, CSS y JS</p>`);
+
+  const [css, setCss] = useState<string>(`body {
+  font-family: Arial;
+  background: #f9fafb;
+}
+h1 {
+  color: #2563eb;
+  font-size: 56px;
+}`);
+
+  const [js, setJs] = useState<string>(`console.log("Hola desde JS");`);
+
+  const generateHTML = () => `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+${css}
+</style>
+</head>
+<body>
+${html}
+
+<script>
+try {
+${js}
+} catch (e) {
+  document.body.innerHTML += '<pre style="color:red">' + e + '</pre>';
+}
+</script>
+</body>
+</html>
+`;
 
   return (
     <>
-      {/* Header */}
-      <Stack.Screen
-        options={{
-          title: 'HTML',
-        }}
-      />
+      <Stack.Screen options={{ title: 'Editor' }} />
 
       <View style={styles.container}>
         {/* Tabs */}
         <View style={styles.tabs}>
-          <Tab  label="HTML" active={activeTab === 'html'} onPress={() => setActiveTab('html')} />
+          <Tab label="HTML" active={activeTab === 'html'} onPress={() => setActiveTab('html')} />
           <Tab label="CSS" active={activeTab === 'css'} onPress={() => setActiveTab('css')} />
           <Tab label="JS" active={activeTab === 'js'} onPress={() => setActiveTab('js')} />
-          <Tab label="Ejecución" active={activeTab === 'run'} onPress={() => setActiveTab('run')} />
+          <Tab label="Ejecutar" active={activeTab === 'run'} onPress={() => setActiveTab('run')} />
         </View>
 
-        {/* Contenido */}
+        {/* HTML */}
         {activeTab === 'html' && (
           <TextInput
             value={html}
             onChangeText={setHtml}
             style={styles.editor}
             multiline
-            textAlignVertical="top"
             autoCapitalize="none"
             autoCorrect={false}
             spellCheck={false}
           />
         )}
 
-        {activeTab !== 'html' && (
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>
-              Sección {activeTab.toUpperCase()} próximamente
-            </Text>
-          </View>
+        {/* CSS */}
+        {activeTab === 'css' && (
+          <TextInput
+            value={css}
+            onChangeText={setCss}
+            style={styles.editor}
+            multiline
+            autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
+          />
+        )}
+
+        {/* JS */}
+        {activeTab === 'js' && (
+          <TextInput
+            value={js}
+            onChangeText={setJs}
+            style={styles.editor}
+            multiline
+            autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
+          />
+        )}
+
+        {/* RUN */}
+        {activeTab === 'run' && (
+          <WebView
+            originWhitelist={['*']}
+            source={{ html: generateHTML() }}
+            style={{ flex: 1 }}
+          />
         )}
       </View>
     </>
   );
 }
 
-/* ---------- Tab Component ---------- */
+/* ---------------- TAB COMPONENT ---------------- */
 
 interface TabProps {
   label: string;
@@ -69,7 +124,7 @@ interface TabProps {
   onPress: () => void;
 }
 
-function Tab({ label, active, onPress }: TabProps): JSX.Element {
+function Tab({ label, active, onPress }: TabProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -82,7 +137,7 @@ function Tab({ label, active, onPress }: TabProps): JSX.Element {
   );
 }
 
-/* ---------- Styles ---------- */
+/* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -91,53 +146,41 @@ const styles = StyleSheet.create({
   },
 
   tabs: {
-    backgroundColor: '#AFCBFF',
     flexDirection: 'row',
-    justifyContent: 'space-around', // separación uniforme
-    alignItems: 'center',
-    paddingVertical: 8,
+    justifyContent: 'space-around',
+    backgroundColor: '#AFCBFF',
     borderBottomWidth: 1,
     borderColor: '#E5E7EB',
-
   },
 
   tab: {
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
   },
 
   tabActive: {
     borderBottomWidth: 2,
-    borderColor: '#0A84FF',
+    borderColor: '#2563EB',
   },
 
   tabText: {
     fontSize: 14,
-    color: '#000000',
+    color: '#000',
     fontWeight: '500',
   },
 
   tabTextActive: {
-    color: '#0A84FF',
+    color: '#2563EB',
     fontWeight: '600',
   },
 
   editor: {
     flex: 1,
-    padding: 12,
+    padding: 14,
     fontSize: 14,
     fontFamily: 'monospace',
-    color: '#111827',
-    backgroundColor: '#FFFFFF',
-  },
-
-  placeholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  placeholderText: {
-    color: '#9CA3AF',
+    backgroundColor: '#0f172a',
+    color: '#e5e7eb',
+    textAlignVertical: 'top',
   },
 });
