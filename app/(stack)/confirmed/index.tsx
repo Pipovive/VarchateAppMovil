@@ -1,4 +1,5 @@
 import Button from '@/components/shared/button';
+import { router } from 'expo-router';
 import React from 'react';
 import { Image, Text, View } from 'react-native';
 
@@ -32,10 +33,7 @@ const CarruselScreen = () => {
           Te enviamos un enlace a tu correo electrónico para restablecer tu contraseña. Revisa tu bandeja de entrada o la carpeta de spam.
         </Text>
 
-        <Text className="text-secondary-100 font-barlow-medium text-center text-lg">
-          ¿No la recibiste?
-        </Text>
-        <Button variant='text-only'>Reenviar enlace</Button>
+        <Button onPress={router.back}>Regresar al inicio</Button>
          
       </View>
 

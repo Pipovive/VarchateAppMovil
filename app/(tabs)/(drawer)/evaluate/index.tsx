@@ -1,22 +1,74 @@
+import Button from '@/components/shared/button'
 import { TopProgressHeader } from '@/components/shared/headerProgress'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Image, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const index = () => {
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView style={styles.container}>
       <TopProgressHeader
-        title={"Prueba"}
+        title="Prueba"
         progress={69}
-        activeSlug={"Prueba2" as string}
+        activeSlug="Prueba2"
       />
-      <View>
-        <Text>index</Text>
+
+      {/* CONTENIDO CENTRADO */}
+      <View style={styles.content}>
+        <Text style={styles.tabText}>Duración: 10 minutos</Text>
+
+        <Text style={styles.tabText}>
+          Preguntas: selección múltiple, verdadero/falso y completar
+        </Text>
+
+        <Text style={styles.tabText}>
+          Al finalizar, obtendrás tu puntaje automáticamente.
+        </Text>
+
+        <Image
+          source={require('../../../../assets/images/gato_eval.png')}
+          style={styles.image}
+        />
+
+        <Button
+          variant="contained"
+          className="mt-3"
+          onPress={() => {}}
+        >
+          Realizar Evaluación
+        </Button>
       </View>
     </SafeAreaView>
-    
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+
+  content: {
+    flex: 1,                 // ocupa el espacio restante
+    justifyContent: 'center',// centra vertical
+    alignItems: 'center',    // centra horizontal
+    paddingHorizontal: 24,
+  },
+
+  tabText: {
+    fontSize: 14,
+    color: '#767676',
+    fontWeight: '500',
+    textAlign: 'center',     // centra el texto
+    marginBottom: 6,
+  },
+
+  image: {
+    width: 220,
+    resizeMode: 'contain',
+    marginVertical: 20,
+  },
+})
+
 
 export default index

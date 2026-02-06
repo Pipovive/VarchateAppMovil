@@ -1,18 +1,30 @@
 import ProgressCard from '@/components/shared/ProgressCard';
+import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
+
 const ProfileScreen = () => {
+  const { user, loading, error, fetchUser } = useUserViewModel();
+
+  useEffect(() => {
+    fetchUser(); // Cargar usuario al montar el componente
+  }, []);
+
+  if (loading) return <Text>Cargando...</Text>;
+  if (error) return <Text>Error: {error}</Text>;
+
+
   const router = useRouter();
-  const id ='1';
+  const id = '1';
 
   return (
     <View className='flex-1 bg-primary-500 rounded-3xl p-4 my-10 border border-secondary-100/10 mx-3'>
 
       <View className="flex-row justify-end">
-        <TouchableOpacity onPress={() => {router.push('/profile/${id}')}}>
+        <TouchableOpacity onPress={() => { router.push('/profile/${id}') }}>
           <FontAwesome5 name="edit" size={28} color="#000" />
         </TouchableOpacity>
       </View>
@@ -20,10 +32,10 @@ const ProfileScreen = () => {
 
       <View className='items-center justify-center'>
         <Image
-        style={{width: 160, resizeMode: 'contain', marginTop: 6, borderRadius: 50, height: 160}}
-        source={require('../../../../assets/images/gato-perfil.png')}></Image>
+          style={{ width: 160, resizeMode: 'contain', marginTop: 6, borderRadius: 50, height: 160 }}
+          source={require('../../../../assets/images/gato-perfil.png')}></Image>
 
-        <Text className='font-barlow-medium text-center mb-3 text-2xl text-secondary'>Juan Pérez</Text>
+        <Text className='font-barlow-medium text-center mb-3 text-2xl text-secondary'>{user?.nombre}</Text>
 
       </View>
 

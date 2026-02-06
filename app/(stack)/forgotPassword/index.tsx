@@ -1,44 +1,43 @@
 import Button from '@/components/shared/button';
 import Input from '@/components/shared/input';
+import { useForgotPasswordViewModel } from '@/src/viewmodels/ForgotPasswordViewModel';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Alert, Image, Text, View } from 'react-native';
 
 const CarruselScreen = () => {
+  const { loading, error, success, sendResetEmail } = useForgotPasswordViewModel();
   const [email, setEmail] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
 
   const handleSend = async () => {
-    // Limpiar mensaje previo
-    setErrorMsg("");
+    // Limpiar errores previos
+    setLocalError("");
 
     // Validación básica del correo
     const regex = /\S+@\S+\.\S+/;
     if (!regex.test(email)) {
-      setErrorMsg("Por favor ingresa un correo válido.");
+      setLocalError("Por favor ingresa un correo válido.");
       return;
     }
 
     try {
-      setLoading(true);
+      await sendResetEmail(email);
 
-      // ⛔ Aquí simulas el envío — reemplaza con tu fetch real
-      const enviado = false; // <-- fuerza error para probar
-      // const enviado = true; // <-- úsalo si quieres probar éxito
+      // Si fue exitoso, mostrar alerta y redirigir
+      Alert.alert(
+        'Correo enviado',
+        'Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.',
+        [
+          {
+            text: 'Entendido',
+            onPress: () => router.push('/(stack)/confirmed')
+          }
+        ]
+      );
 
-      if (!enviado) {
-        throw new Error("No se pudo enviar el correo. Intenta de nuevo.");
-      }
-
-      // Si todo ok
-      alert("Correo enviado correctamente");
-      router.push('/login');
-
-    } catch (error) {
-      setErrorMsg(error.message);
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      setLocalError(err?.response?.data?.message || err.message || 'No se pudo enviar el correo');
     }
   };
 
@@ -68,35 +67,51 @@ const CarruselScreen = () => {
         <Text className="text-secondary-100 font-barlow-medium text-center text-lg">
           Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
         </Text>
-         <Input
+        
+        <Input
           className='m-2'
           value={email}
           onChangeText={setEmail}
           placeholder="Escribe tu correo"
           keyboardType="email-address"
+          autoCapitalize='none'
+          error={localError || error || ''}
+          editable={!loading}
         />
+
+        {/* MENSAJE DE ÉXITO */}
+        {success && (
+          <View className='bg-green-100 p-4 rounded-lg mt-2'>
+            <Text className='font-barlow-medium text-green-800 text-center'>
+              ✓ Correo enviado exitosamente
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
-        {/* COLUMNA 2 */}
-        <View style={{ flex: 1, marginLeft: 6, margin:5 }}>
-          <Button className="h-14 justify-center color-secondary-100" onPress={() => router.back()}>Regresar</Button>
+        {/* BOTÓN REGRESAR */}
+        <View style={{ flex: 1, marginLeft: 6, margin: 5 }}>
+          <Button 
+            className="h-14 justify-center color-secondary-100" 
+            onPress={() => router.back()}
+            disabled={loading}
+          >
+            Regresar
+          </Button>
         </View>
 
-        {/* COLUMNA 1 */}
-        <View style={{ flex: 1, marginRight: 6, margin:5}}>
-          <Button  className="h-14 justify-center" onPress={() => router.push('/(stack)/confirmed')}>Continuar</Button>
+        {/* BOTÓN CONTINUAR */}
+        <View style={{ flex: 1, marginRight: 6, margin: 5 }}>
+          <Button 
+            className="h-14 justify-center" 
+            onPress={handleSend}
+            disabled={loading || !email}
+          >
+            {loading ? 'Enviando...' : 'Continuar'}
+          </Button>
         </View>
       </View>
-
-      {/* MENSAJE DE ERROR */}
-      {errorMsg.length > 0 && (
-        <Text className="text-red-500 text-center mt-2 m-4">
-          {errorMsg}
-        </Text>
-      )}
-
-      
     </View>
   );
 };
