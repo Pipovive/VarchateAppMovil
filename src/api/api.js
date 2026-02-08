@@ -1,10 +1,14 @@
 const { default: axios } = require("axios")
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
+//NOTA arracnar php artisan asi: php artisan serve --host=0.0.0.0 --port=8000
+
+
 const api = axios.create({
     // baseURL: 'http://192.168.20.27:8000/api',
     // base url SENA:10.32.21.107 
-    baseURL: 'http://10.32.21.107:8000/api',
+    baseURL: 'http://192.168.101.9:8000/api',
     timeout: 5000,
     headers: {
         'Content-Type': 'application/json',

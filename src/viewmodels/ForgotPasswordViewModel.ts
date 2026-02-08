@@ -1,5 +1,5 @@
 // src/viewmodels/ForgotPasswordViewModel.ts
-import { forgotPassword } from '@/src/services/authservices';
+import { forgotPassword, logout } from '@/src/services/authservices';
 import { useState } from 'react';
 
 export const useForgotPasswordViewModel = () => {
@@ -38,6 +38,7 @@ export const useForgotPasswordViewModel = () => {
         loading,
         error,
         success,
-        sendResetEmail
+        sendResetEmail,
+        logout
     };
 };

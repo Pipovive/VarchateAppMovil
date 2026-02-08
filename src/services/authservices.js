@@ -41,9 +41,25 @@ export const updateUserProfile = async (nombre, avatarId) => {
     return response.data;
 };
 
+export const logout = async () => {
+    const response = await api.post('/logout');
+    return response.data;
+}
+
+//BORRAR CUENTA
+
+export const deleteAccount = async (password) => {
+    const response = await api.delete('/account', {
+        data: {  // ← Importante: axios DELETE requiere 'data'
+            password: password
+        }
+    });
+    return response.data;
+};
+
 export const updatePassword = async (
-    currentPassword, 
-    newPassword, 
+    currentPassword,
+    newPassword,
     passwordConfirmation
 ) => {
     const response = await api.put('/me/password', {
@@ -62,3 +78,4 @@ export const forgotPassword = async (email) => {
 
     return response.data;
 };
+

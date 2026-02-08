@@ -1,4 +1,5 @@
-import { requestUser, updatePassword, updateUserProfile } from '@/src/services/authservices';
+import { deleteAccount as deleteAccountService, logout as logoutServices, requestUser, updatePassword, updateUserProfile } from '@/src/services/authservices';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 
 interface User {
@@ -12,6 +13,7 @@ export const useUserViewModel = () => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
 
     const fetchUser = async () => {
         try {
@@ -36,6 +38,30 @@ export const useUserViewModel = () => {
             setLoading(false);
         }
     };
+
+    const logout = async () => {
+        try {
+            await logoutServices();
+
+            await AsyncStorage.removeItem('token');
+            setUser(null);
+
+            return true;
+        } catch (err: any) {
+            const errorMessage = err?.response?.data?.message || 'Error al cerrar sesión';
+            setError(errorMessage);
+            console.error('Error en logout:', err);
+
+            // Aunque falle el servidor, limpiar localmente
+            await AsyncStorage.removeItem('token');
+            setUser(null);
+
+            throw err;
+        } finally {
+            setLoading(false);
+
+        }
+    }
 
     const changePassword = async (
         currentPassword: string,
@@ -104,12 +130,44 @@ export const useUserViewModel = () => {
         }
     };
 
+    const deleteAccount = async (password: string) => {
+        try {
+            console.log('🔴 Intentando eliminar cuenta con password:', password ? '***' : 'VACÍO');
+            setLoading(true);
+            setError(null);
+
+            if (!password || password.trim() === '') {
+                throw new Error('Debes ingresar tu contraseña para eliminar la cuenta');
+            }
+
+            // Llamar al endpoint de eliminación
+            await deleteAccountService(password);
+
+            // Limpiar token y estado
+            await AsyncStorage.removeItem('token');
+            setUser(null);
+
+            return true;
+
+        } catch (err: any) {
+            console.log('❌ Error completo:', error);
+            console.log('❌ Error response:', error);
+            console.log('❌ Error status:', error);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         user,
         loading,
         error,
         fetchUser,
         changePassword,
-        updateProfile
+        updateProfile,
+        logout,
+        deleteAccount
+
     };
 };

@@ -4,10 +4,10 @@ import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { AntDesign, Feather, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const UserEditScreen = () => {
-  const { user, loading, error, fetchUser, changePassword, updateProfile } = useUserViewModel();
+  const { user, loading, error, fetchUser, changePassword, updateProfile, logout, deleteAccount } = useUserViewModel();
 
   const [nombre, setNombre] = useState('');
   const [avatarId, setAvatarId] = useState(1);
@@ -87,6 +87,97 @@ const UserEditScreen = () => {
       Alert.alert(
         'Error',
         err?.response?.data?.message || err.message || 'Error al guardar cambios'
+      );
+    }
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que deseas cerrar sesión?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Cerrar sesión',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logout();
+              // Redirigir al login
+              router.replace('/(stack)/login'); // Ajusta la ruta según tu estructura
+            } catch (err) {
+              // Aunque haya error, redirigir igual porque se limpió localmente
+              router.replace('/(stack)/login');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePasswordInput, setDeletePasswordInput] = useState('');
+
+  const handleDeleteAccount = () => {
+    console.log('🟢 handleDeleteAccount ejecutado');
+
+    Alert.alert(
+      '⚠️ Eliminar cuenta',
+      'Esta acción es permanente y no se puede deshacer. ¿Estás seguro?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+          onPress: () => console.log('❌ Usuario canceló')
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => {
+            console.log('🟡 Usuario confirmó, mostrando modal de contraseña');
+            setShowDeleteModal(true);
+          }
+        }
+      ]
+    );
+  };
+
+  const confirmDeleteAccount = async () => {
+    console.log('🔵 confirmDeleteAccount ejecutado');
+
+    try {
+      if (!deletePasswordInput || deletePasswordInput.trim() === '') {
+        Alert.alert('Error', 'Debes ingresar tu contraseña');
+        return;
+      }
+
+      console.log('🔴 Llamando a deleteAccount con password...');
+      await deleteAccount(deletePasswordInput);
+
+      console.log('✅ Cuenta eliminada exitosamente');
+      setShowDeleteModal(false);
+      setDeletePasswordInput('');
+
+      Alert.alert(
+        'Cuenta eliminada',
+        'Tu cuenta ha sido eliminada exitosamente',
+        [
+          {
+            text: 'Entendido',
+            onPress: () => router.replace('/(stack)/login')
+          }
+        ]
+      );
+
+    } catch (err: any) {
+      console.log('❌ Error al eliminar cuenta:', err);
+      console.log('❌ Error response:', err?.response?.data);
+      Alert.alert(
+        'Error',
+        err?.response?.data?.message || err.message || 'No se pudo eliminar la cuenta. Verifica tu contraseña.'
       );
     }
   };
@@ -236,10 +327,140 @@ const UserEditScreen = () => {
 
         <View className='bg-quaternary items-center rounded-md flex-row mt-1 px-2'>
           <FontAwesome5 name='trash-alt' size={19} color='#D64545' />
-          <Button variant='text-only' textColor='normal'>Eliminar cuenta</Button>
+          <Button
+            variant='text-only'
+            textColor='normal'
+            onPress={handleDeleteAccount}
+            disabled={loading}
+          >
+            Eliminar cuenta
+          </Button>
         </View>
 
-        <Button color='tertiary' className='mt-10'>Cerrar sesión</Button>
+        {/* MODAL PARA CONFIRMAR CONTRASEÑA */}
+        <Modal
+          visible={showDeleteModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => {
+            setShowDeleteModal(false);
+            setDeletePasswordInput('');
+          }}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20
+          }}>
+            <View style={{
+              backgroundColor: '#FFFFFF',  // ← Fondo blanco sólido
+              borderRadius: 16,
+              padding: 24,
+              width: '100%',
+              maxWidth: 400,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 5  // Para Android
+            }}>
+              <Text style={{
+                fontFamily: 'Barlow-Bold',
+                fontSize: 24,
+                marginBottom: 8,
+                textAlign: 'center',
+                color: '#000'
+              }}>
+                Confirmar contraseña
+              </Text>
+
+              <Text style={{
+                fontFamily: 'Barlow-Regular',
+                fontSize: 16,
+                color: '#6B7280',
+                marginBottom: 24,
+                textAlign: 'center'
+              }}>
+                Ingresa tu contraseña para confirmar la eliminación de tu cuenta
+              </Text>
+
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#D1D5DB',
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 24,
+                  fontFamily: 'Barlow-Medium',
+                  fontSize: 16,
+                  backgroundColor: '#FFFFFF'
+                }}
+                placeholder='Contraseña'
+                placeholderTextColor='#9CA3AF'
+                secureTextEntry
+                value={deletePasswordInput}
+                onChangeText={setDeletePasswordInput}
+                autoFocus
+              />
+
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#E5E7EB',
+                    borderRadius: 8,
+                    padding: 16
+                  }}
+                  onPress={() => {
+                    console.log('❌ Usuario canceló desde modal');
+                    setShowDeleteModal(false);
+                    setDeletePasswordInput('');
+                  }}
+                >
+                  <Text style={{
+                    fontFamily: 'Barlow-Bold',
+                    textAlign: 'center',
+                    color: '#374151',
+                    fontSize: 16
+                  }}>
+                    Cancelar
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#EF4444',
+                    borderRadius: 8,
+                    padding: 16,
+                    opacity: loading ? 0.5 : 1
+                  }}
+                  onPress={confirmDeleteAccount}
+                  disabled={loading}
+                >
+                  <Text style={{
+                    fontFamily: 'Barlow-Bold',
+                    textAlign: 'center',
+                    color: '#FFFFFF',
+                    fontSize: 16
+                  }}>
+                    {loading ? 'Eliminando...' : 'Eliminar'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        <Button
+          color='tertiary'
+          className='mt-10'
+          onPress={handleLogout}
+          disabled={loading}
+        >
+          {loading ? 'Cerrando sesión...' : 'Cerrar sesión'}
+        </Button>
 
       </ScrollView>
     </View>

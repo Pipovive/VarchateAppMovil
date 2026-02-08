@@ -9,7 +9,7 @@ const StackProfile = () => {
                 contentStyle: {
                     backgroundColor: 'white'
                 },
-             headerStyle: {
+                headerStyle: {
                     backgroundColor: '#0A84FF', // 🔵 azul
                 },
                 headerTintColor: '#FFFFFF', // color flecha y título
@@ -29,13 +29,21 @@ const StackProfile = () => {
                 }} />
 
             <Stack.Screen
+                name='profile/[id]'
+                options={{
+                    title: 'Profile',
+                    headerShown: false,
+
+                }} />
+
+            <Stack.Screen
                 name='code/index'
                 options={{
                     title: 'Index.HTML',
                     headerShown: true,
 
                 }} />
-            
+
             <Stack.Screen
                 name='editor/index'
                 options={{
