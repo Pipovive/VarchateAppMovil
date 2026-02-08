@@ -79,3 +79,10 @@ export const forgotPassword = async (email) => {
     return response.data;
 };
 
+export const loginWithGoogle = async (googleToken) => {
+    const response = await api.post('/auth/google', {
+        token: googleToken
+    });
+
+    return response.data;
+};

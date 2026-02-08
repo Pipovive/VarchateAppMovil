@@ -1,7 +1,7 @@
-import { deleteAccount as deleteAccountService, logout as logoutServices, requestUser, updatePassword, updateUserProfile } from '@/src/services/authservices';
+import { deleteAccount as deleteAccountService, loginWithGoogle, logout as logoutServices, requestUser, updatePassword, updateUserProfile } from '@/src/services/authservices';
+import { signInWithGoogle, } from '@/src/services/googleAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
-
 interface User {
     id: number;
     nombre: string;
@@ -158,6 +158,44 @@ export const useUserViewModel = () => {
             setLoading(false);
         }
     };
+
+    const loginWithGoogleAccount = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            console.log('🟢 Iniciando Google Sign-In...');
+
+            // Obtener token de Google
+            const { idToken } = await signInWithGoogle();
+
+            console.log('🟡 Token de Google obtenido, enviando a Laravel...');
+
+            // Enviar token a Laravel
+            const data = await loginWithGoogle(idToken);
+            const { access_token, user } = data;
+
+            if (!access_token) {
+                throw new Error('Token no recibido del servidor');
+            }
+
+            console.log('✅ Login con Google exitoso');
+
+            // Guardar token de Laravel
+            await AsyncStorage.setItem('token', access_token);
+
+            return { user, access_token };
+
+        } catch (err: any) {
+            console.log('❌ Error en Google login:', err);
+            const errorMessage = err?.response?.data?.message || err.message || 'Error al iniciar sesión con Google';
+            setError(errorMessage);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     return {
         user,

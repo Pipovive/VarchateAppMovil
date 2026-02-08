@@ -10,10 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.varchate.app"  // ← Agrega esto también para iOS
+      "bundleIdentifier": "com.varchate.app" // ← Agrega esto también para iOS
     },
     "android": {
-      "package": "com.varchate.app",  // ← AGREGA ESTA LÍNEA
+      "package": "com.varchate.app", // ← AGREGA ESTA LÍNEA
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -41,8 +41,7 @@
             "backgroundColor": "#000000"
           }
         }
-      ],
-      "@react-native-google-signin/google-signin"  // ← AGREGA ESTE PLUGIN
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
