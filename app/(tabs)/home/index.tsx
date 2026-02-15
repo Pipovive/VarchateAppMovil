@@ -1,8 +1,8 @@
-import Button from '@/components/shared/button'
-import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
-import { Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import Button from '@/components/shared/button';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context' // ← Comenta esto
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -47,21 +47,16 @@ const HomeScreen = () => {
   ]);
 
   const handlePress = (slug: string) => {
-    // Opción A: Ruta dinámica
-    // router.push(`/(stack)/competition/${slug}` as any);
-    
-    // Opción B: Ruta estática
-    router.push(`/(tabs)/competition/${slug}`);
+    router.push(`/(tabs)/(drawer)/competition/${slug}`);
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F2F2F2] px-4">
-
+    <View style={{ flex: 1, backgroundColor: '#F2F2F2', paddingHorizontal: 16, paddingTop: 40 }}>
       <Text className="font-barlow-bold text-center text-2xl mt-4 mb-6">
         COMPETENCIAS
       </Text>
 
-      <View className="flex-row flex-wrap gap-4 justify-between">
+      <ScrollView contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between' }}>
         {competencias.map((item) => (
           <Button
             key={item.id}
@@ -74,9 +69,8 @@ const HomeScreen = () => {
             {item.title}
           </Button>
         ))}
-      </View>
-
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 };
 

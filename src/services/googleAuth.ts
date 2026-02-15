@@ -1,27 +1,28 @@
-import { GoogleSignin, User } from '@react-native-google-signin/google-signin';
+// src/services/googleAuth.ts
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import React from 'react';
 
-interface GoogleSignInResult {
-  idToken: string;
-  user: User;
-}
+WebBrowser.maybeCompleteAuthSession();
 
-export const signInWithGoogle = async (): Promise<GoogleSignInResult> => {
-  try {
-    await GoogleSignin.hasPlayServices();
+const REDIRECT_URI = 'https://auth.expo.io/@chavez_dev/VarchateApp';
 
-    const result: any = await GoogleSignin.signIn();
+export const useGoogleSignIn = () => {
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: '29593004535-l84oosto3qqri5nmfludqmvvhlvb8341.apps.googleusercontent.com',
+    redirectUri: REDIRECT_URI,
+  });
 
-    // 🛡️ Type guard
-    if (!('idToken' in result) || !result.idToken) {
-      throw new Error('Inicio de sesión cancelado o sin token');
+  // Solo log una vez cuando cambia request
+  React.useEffect(() => {
+    if (request) {
+      console.log('✅ Google Auth configurado correctamente');
     }
+  }, [request?.clientId]); // Solo cuando cambie el clientId, no en cada render
 
-    return {
-      idToken: result.idToken,
-      user: result.user,
-    };
-  } catch (error) {
-    console.error('❌ Error en Google Sign-In:', error);
-    throw error;
-  }
+  return {
+    request,
+    response,
+    promptAsync,
+  };
 };

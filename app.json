@@ -6,14 +6,32 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "varchateapp",
+    "platforms": ["ios", "android"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.varchate.app" // ← Agrega esto también para iOS
+      "bundleIdentifier": "com.varchate.app"
     },
     "android": {
-      "package": "com.varchate.app", // ← AGREGA ESTA LÍNEA
+      "package": "com.varchate.app",
+       "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "auth.expo.io",
+              "pathPrefix": "/@chavez_dev/VarchateApp"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -30,6 +48,7 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-google-signin/google-signin",
       [
         "expo-splash-screen",
         {
@@ -46,6 +65,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "19f4aac8-b91e-4cb3-bf12-ff6054cb3f9c"
+      }
     }
   }
 }

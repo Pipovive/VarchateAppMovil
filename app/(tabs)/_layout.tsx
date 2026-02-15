@@ -10,33 +10,29 @@ const TabsLayout = () => {
         tabBarStyle: {
           backgroundColor: '#0099FF',
           paddingHorizontal: 20,
-          borderTopWidth: 0, // Elimina borde superior
-          elevation: 0, // Elimina sombra en Android
-          shadowOpacity: 0, // Elimina sombra en iOS
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
         },
-        tabBarItemStyle: {
-          gap: 10,
+        tabBarLabelStyle: {
+          color: '#FFFFFF',
+          fontSize: 12,
+          fontWeight: '500',
         },
         tabBarActiveTintColor: '#FFFFFF',
         tabBarInactiveTintColor: '#FFFFFF',
-
       }}
     >
       <Tabs.Screen
         name="home/index"
         options={{
           title: 'Módulos',
-          tabBarLabelStyle: {
-            color: '#FFFFFF',
-            fontSize: 12,
-            fontWeight: '500',
-          },
           tabBarIcon: ({ focused }) => (
             <Image
               source={require('../../assets/images/VA.png')}
               style={{
-                width:  focused ? 28 : 24,
-                height:  focused ? 28 : 24,
+                width: focused ? 28 : 24,
+                height: focused ? 28 : 24,
                 resizeMode: 'contain',
               }}
             />
@@ -48,17 +44,12 @@ const TabsLayout = () => {
         name="editor"
         options={{
           title: 'Editor',
-          tabBarLabelStyle: {
-            color: '#FFFFFF',
-            fontSize: 12,
-            fontWeight: '500',
-          },
-          tabBarIcon: ({  focused }) => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={require('../../assets/images/codeW.png')}
               style={{
-                width:  focused ? 28 : 24,
-                height:  focused ? 28 : 24 ,
+                width: focused ? 28 : 24,
+                height: focused ? 28 : 24,
                 resizeMode: 'contain',
               }}
             />
@@ -70,17 +61,12 @@ const TabsLayout = () => {
         name="chatbot/index"
         options={{
           title: 'Pregúntar',
-          tabBarLabelStyle: {
-            color: '#FFFFFF',
-            fontSize: 12,
-            fontWeight: '500',
-          },
           tabBarIcon: ({ focused }) => (
             <Image
               source={require('../../assets/images/iaW.png')}
               style={{
-                width:  focused ? 28 : 24 ,
-                height:  focused ? 28 : 24 ,
+                width: focused ? 28 : 24,
+                height: focused ? 28 : 24,
                 resizeMode: 'contain',
               }}
             />
@@ -92,28 +78,28 @@ const TabsLayout = () => {
         name="(stack)"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({  }) => (
+          tabBarIcon: () => (
             <Image
               source={require('../../assets/images/foto-perfil.png')}
               style={{
-                width:  24,
-                height:  24, 
-                borderRadius: 50,
-                borderColor: 'white'
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: 'white',
               }}
             />
           ),
         }}
       />
 
+      {/* Oculta el drawer de los tabs */}
       <Tabs.Screen
         name="(drawer)"
         options={{
-          href: null,
+          href: null, // ← Esto oculta el drawer de la tab bar
         }}
       />
-
-
     </Tabs>
   );
 };

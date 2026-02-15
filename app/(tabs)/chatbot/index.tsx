@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Message = {
   id: string;
@@ -33,7 +32,6 @@ export default function ChatbotScreen() {
   const [isTyping, setIsTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Simular respuesta del bot
   const sendBotResponse = (userMessage: string) => {
     setIsTyping(true);
 
@@ -73,20 +71,18 @@ export default function ChatbotScreen() {
     setMessages((prev) => [...prev, userMessage]);
     setInputText('');
 
-    // Simular respuesta del bot
     sendBotResponse(inputText);
   };
 
   useEffect(() => {
-    // Auto scroll al último mensaje
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
   return (
-    <SafeAreaView className="flex-1 bg-primary-600">
+    <View style={{ flex: 1, backgroundColor: '#0099FF', paddingTop: 50 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+        style={{ flex: 1 }}
         keyboardVerticalOffset={0}
       >
         {/* HEADER */}
@@ -131,9 +127,9 @@ export default function ChatbotScreen() {
               </View>
               <View className="bg-quaternary rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
                 <View className="flex-row items-center space-x-1">
-                  <View className="w-2 h-2 bg-secondary-500 rounded-full animate-bounce" />
-                  <View className="w-2 h-2 bg-secondary-500 rounded-full animate-bounce delay-100" />
-                  <View className="w-2 h-2 bg-secondary-500 rounded-full animate-bounce delay-200" />
+                  <View className="w-2 h-2 bg-secondary-500 rounded-full" />
+                  <View className="w-2 h-2 bg-secondary-500 rounded-full" />
+                  <View className="w-2 h-2 bg-secondary-500 rounded-full" />
                 </View>
               </View>
             </View>
@@ -195,11 +191,10 @@ export default function ChatbotScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-// COMPONENTE DE BURBUJA DE MENSAJE
 function MessageBubble({ message }: { message: Message }) {
   const isBot = message.isBot;
 

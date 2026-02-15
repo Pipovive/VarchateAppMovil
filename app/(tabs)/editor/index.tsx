@@ -2,64 +2,119 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-const [lastOpened, setLasOpened] = useState<Date | null>(null);
+const EditorIndex = () => {
+  // ✅ useState DENTRO del componente
+  const [lastOpened, setLastOpened] = useState<Date | null>(null);
 
+  const handlePress = () => {
+    setLastOpened(new Date());
+    router.push('/(tabs)/editor/code');
+  };
 
-const handlePress = () => {
-  setLasOpened(new Date())
-}
-
-const index = () => {
   return (
-    <SafeAreaView style={{ backgroundColor: "#EAF4FF" }} className="flex-1 bg-white">
-
-      <View className="px-4 py-3">
-        <Text className="text-white text-base">Inicio - Editor de código</Text>
+    <View style={{ flex: 1, backgroundColor: "#EAF4FF" }}>
+      {/* Header */}
+      <View style={{ 
+        paddingHorizontal: 16, 
+        paddingVertical: 12,
+        paddingTop: 50, // ← Espaciado superior manual
+        backgroundColor: "#0099FF" 
+      }}>
+        <Text style={{ color: "#FFFFFF", fontSize: 16 }}>
+          Inicio - Editor de código
+        </Text>
       </View>
 
-
-      <ScrollView style={{ backgroundColor: "#FFFFFF" }} className="flex-1 px-4 py-6 m-4">
-
-        <Text className="text-xl font-bold text-gray-800 mb-4">
+      {/* Contenido */}
+      <ScrollView 
+        style={{ 
+          flex: 1, 
+          backgroundColor: "#FFFFFF",
+          margin: 16,
+          borderRadius: 8,
+          padding: 16
+        }}
+      >
+        <Text style={{ 
+          fontSize: 20, 
+          fontWeight: 'bold', 
+          color: "#1F2937",
+          marginBottom: 16
+        }}>
           Códigos recientes
         </Text>
 
-        {/* Texto principal */}
+        {/* Item de código */}
         <TouchableOpacity
-          onPress={ () => router.push('/editor/code')}
-          className="flex-row items-center py-3 border-b border-gray-200">
-
-          <View className="mr-3">
+          onPress={handlePress}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: '#E5E7EB'
+          }}
+        >
+          <View style={{ marginRight: 12 }}>
             <FontAwesome name="html5" size={32} color="#E44D26" />
           </View>
 
-          <View className="flex-1">
-            <Text className="text-base font-semibold text-gray-800">
+          <View style={{ flex: 1 }}>
+            <Text style={{ 
+              fontSize: 16, 
+              fontWeight: '600', 
+              color: "#1F2937" 
+            }}>
               Index.html
             </Text>
-            <Text className="text-sm text-gray-500">
-              Última vez abierto { }
-              {lastOpened
-                ? lastOpened.toLocaleString()
+            <Text style={{ 
+              fontSize: 14, 
+              color: "#6B7280",
+              marginTop: 4
+            }}>
+              Última vez abierto: {lastOpened
+                ? lastOpened.toLocaleString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
                 : 'Nunca'}
             </Text>
           </View>
         </TouchableOpacity>
-
-
       </ScrollView>
 
-
+      {/* Botón flotante */}
       <TouchableOpacity
-        className="absolute bottom-6 right-6 bg-blue-500 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+        style={{
+          position: 'absolute',
+          bottom: 24,
+          right: 24,
+          backgroundColor: '#3B82F6',
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }}
         activeOpacity={0.8}
+        onPress={() => {
+          // Aquí va la lógica para crear nuevo archivo
+          console.log("Crear nuevo archivo");
+        }}
       >
         <FontAwesome name="plus" size={24} color="white" />
       </TouchableOpacity>
-    </SafeAreaView>
-  )
-}
+    </View>
+  );
+};
 
-export default index
+export default EditorIndex;

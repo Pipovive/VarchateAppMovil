@@ -1,3 +1,9 @@
+// app/_layout.tsx
+import * as WebBrowser from 'expo-web-browser';
+
+// ⚠️ SOLO UNA VEZ
+WebBrowser.maybeCompleteAuthSession();
+
 import { useFonts } from 'expo-font';
 import { Slot, SplashScreen } from 'expo-router';
 import React, { useEffect } from 'react';
@@ -17,7 +23,7 @@ const RootLayout = () => {
 
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error])
-  
+
   if (!fontsLoaded && !error) return null;
 
   return <Slot />

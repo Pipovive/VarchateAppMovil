@@ -1,5 +1,4 @@
 import { deleteAccount as deleteAccountService, loginWithGoogle, logout as logoutServices, requestUser, updatePassword, updateUserProfile } from '@/src/services/authservices';
-import { signInWithGoogle, } from '@/src/services/googleAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 interface User {
@@ -159,19 +158,13 @@ export const useUserViewModel = () => {
         }
     };
 
-    const loginWithGoogleAccount = async () => {
+    const loginWithGoogleToken = async (idToken: string) => {
         try {
             setLoading(true);
             setError(null);
 
-            console.log('🟢 Iniciando Google Sign-In...');
+            console.log('🟡 Enviando token a Laravel...');
 
-            // Obtener token de Google
-            const { idToken } = await signInWithGoogle();
-
-            console.log('🟡 Token de Google obtenido, enviando a Laravel...');
-
-            // Enviar token a Laravel
             const data = await loginWithGoogle(idToken);
             const { access_token, user } = data;
 
@@ -181,7 +174,6 @@ export const useUserViewModel = () => {
 
             console.log('✅ Login con Google exitoso');
 
-            // Guardar token de Laravel
             await AsyncStorage.setItem('token', access_token);
 
             return { user, access_token };
@@ -197,6 +189,7 @@ export const useUserViewModel = () => {
     };
 
 
+
     return {
         user,
         loading,
@@ -205,7 +198,7 @@ export const useUserViewModel = () => {
         changePassword,
         updateProfile,
         logout,
-        deleteAccount
-
+        deleteAccount,
+        loginWithGoogleToken
     };
 };
