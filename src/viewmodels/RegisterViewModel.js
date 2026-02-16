@@ -10,6 +10,8 @@ export const useRegisterViewModel = () => {
     terms_accepted
   ) => {
     try {
+      console.log('🚀 ViewModel: Iniciando registro...')
+      
       const response = await requestRegister(
         nombre,
         email,
@@ -18,15 +20,23 @@ export const useRegisterViewModel = () => {
         terms_accepted
       );
 
-      // Laravel responde: { message: "..." }
-      if (!response?.message) {
-        throw new Error('Mensaje no recibido');
+      console.log('✅ ViewModel: Respuesta completa:', response)
+
+      // ✅ Si llegó aquí, la petición fue exitosa
+      // Retorna el mensaje o un texto por defecto
+      return {
+        success: true,
+        message: response?.message || 'Registro exitoso',
+        data: response
       }
 
-      return response;
-
     } catch (error) {
-      throw error;
+      console.log('❌ ViewModel: Error capturado:', error)
+      console.log('❌ Error response:', error.response)
+      console.log('❌ Error message:', error.message)
+      
+      // Re-lanza el error para que lo maneje el componente
+      throw error
     }
   };
 

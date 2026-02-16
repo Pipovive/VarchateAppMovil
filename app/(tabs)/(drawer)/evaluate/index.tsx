@@ -2,11 +2,10 @@ import Button from '@/components/shared/button'
 import { TopProgressHeader } from '@/components/shared/headerProgress'
 import React from 'react'
 import { Image, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
-const index = () => {
+const EvaluateIndex = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <TopProgressHeader
         title="Prueba"
         progress={69}
@@ -38,7 +37,7 @@ const index = () => {
           Realizar Evaluación
         </Button>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -46,12 +45,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    paddingTop: 50, // ← Espaciado superior agregado
   },
 
   content: {
-    flex: 1,                 // ocupa el espacio restante
-    justifyContent: 'center',// centra vertical
-    alignItems: 'center',    // centra horizontal
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 24,
   },
 
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#767676',
     fontWeight: '500',
-    textAlign: 'center',     // centra el texto
+    textAlign: 'center',
     marginBottom: 6,
   },
 
@@ -70,5 +70,4 @@ const styles = StyleSheet.create({
   },
 })
 
-
-export default index
+export default EvaluateIndex

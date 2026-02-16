@@ -1,14 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Pressable, PressableProps, Text, View } from "react-native";
+import { Pressable, PressableProps, Text, View, ViewStyle } from "react-native";
 
 interface DrawerButtonProps extends PressableProps {
-  children?: string;
+  children?: React.ReactNode;  // ← CAMBIO: de 'string' a 'React.ReactNode'
   className?: string;
   variant?: "active" | "no-active";
   locked?: boolean;
-  icon?: keyof typeof Ionicons.glyphMap; // Opcional: agregar iconos
-  completed?: boolean; // Opcional: marcar como completado
+  icon?: keyof typeof Ionicons.glyphMap;
+  completed?: boolean;
+  style?: ViewStyle;  // ← AGREGADO: para soportar style prop
 }
 
 const CustomDrawerButton = ({
@@ -18,6 +19,7 @@ const CustomDrawerButton = ({
   locked = false,
   icon,
   completed = false,
+  style,  // ← AGREGADO
   ...rest
 }: DrawerButtonProps) => {
   const isActive = variant === "active";
@@ -30,6 +32,7 @@ const CustomDrawerButton = ({
         ${locked ? "opacity-60" : "opacity-100"}
         ${className ?? ""}
       `}
+      style={style}  // ← AGREGADO: aplicar style prop
       disabled={locked}
       {...rest}
     >

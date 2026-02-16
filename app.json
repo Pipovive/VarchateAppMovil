@@ -1,5 +1,6 @@
 {
   "expo": {
+    
     "name": "VarchateApp",
     "slug": "VarchateApp",
     "version": "1.0.0",
@@ -72,5 +73,8 @@
         "projectId": "19f4aac8-b91e-4cb3-bf12-ff6054cb3f9c"
       }
     }
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx"
   }
 }

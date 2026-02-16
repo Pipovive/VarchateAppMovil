@@ -1,43 +1,39 @@
+import { useModuleViewModel } from "@/src/viewmodels/ModuleViewModel";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { router, useNavigation } from 'expo-router';
-import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-
+import React, { useEffect } from "react";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   title: string;
   progress: number;
-  activeSlug: string; // 🔥 SLUG ACTIVO
+  activeSlug: string;
 };
 
-// 🔥 Lista de competencias con su slug real
-const COMPETENCIAS = [
-  { slug: "intro-programacion", label: "INTRODUCCIÓN A LA PROGRAMACIÓN" },
-  { slug: "html", label: "HTML" },
-  { slug: "css", label: "CSS" },
-  { slug: "javascript", label: "JAVASCRIPT" },
-  { slug: "php", label: "PHP" },
-  { slug: "sql", label: "SQL" },
-];
-
 export function TopProgressHeader({ title, progress, activeSlug }: Props) {
-  const navigateTo = (slug: string) => {
-    if (slug === activeSlug) return; // evita navegación duplicada
-
-    router.replace(`/(tabs)/(drawer)/competition/${slug}`);
-  };
-
   const navigation = useNavigation<DrawerNavigationProp<any>>();
   
+  // 🎣 Usar el ViewModel
+  const { modules, loading, fetchModules } = useModuleViewModel();
 
+  // 🚀 Cargar módulos al montar el componente
+  useEffect(() => {
+    if (modules.length === 0) {
+      fetchModules();
+    }
+  }, []);
+
+  const navigateTo = (slug: string) => {
+    if (slug === activeSlug) return; // Evita navegación duplicada
+    router.replace(`/(tabs)/(drawer)/competition/${slug}`);
+  };
 
   return (
     <>
       {/* PROGRESS BAR */}
       <View className="w-full bg-primary-100 px-4 pt-6 pb-2">
         <View className="flex-row items-center mb-3">
-
           {/* REGRESAR */}
           <TouchableOpacity
             className="mr-4"
@@ -69,45 +65,52 @@ export function TopProgressHeader({ title, progress, activeSlug }: Props) {
       {/* MENU + PILLS */}
       <View className="w-full bg-[#D3E8FF] px-4 py-4">
         <View className="flex-row items-center">
-
           {/* MENÚ */}
           <TouchableOpacity
             className="w-12 h-12 bg-quaternary rounded-2xl items-center justify-center mr-4"
             style={{ elevation: 4 }}
-            onPress={() => navigation.openDrawer() }
+            onPress={() => navigation.openDrawer()}
           >
             <Ionicons name="menu" size={28} color="#0099FF" />
           </TouchableOpacity>
 
           {/* PILLS */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ columnGap: 12 }}
-          >
-            {COMPETENCIAS.map((item) => {
-              const isActive = item.slug === activeSlug;
+          {loading && modules.length === 0 ? (
+            // Mostrar loading solo si no hay módulos cargados
+            <View style={{ paddingHorizontal: 16 }}>
+              <ActivityIndicator size="small" color="#0099FF" />
+            </View>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ columnGap: 12 }}
+            >
+              {modules.map((module) => {
+                const isActive = module.slug === activeSlug;
 
-              return (
-                <TouchableOpacity
-                  key={item.slug}
-                  onPress={() => navigateTo(item.slug)}
-                  activeOpacity={0.85}
-                  className={`px-6 py-3 rounded-xl ${
-                    isActive ? "bg-primary-200" : "bg-quaternary"
-                  }`}
-                >
-                  <Text
-                    className={`font-barlow-bold ${
-                      isActive ? "text-quaternary" : "text-primary"
+                return (
+                  <TouchableOpacity
+                    key={module.id}
+                    onPress={() => navigateTo(module.slug)}
+                    activeOpacity={0.85}
+                    className={`px-6 py-3 rounded-xl ${
+                      isActive ? "bg-primary-200" : "bg-quaternary"
                     }`}
                   >
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+                    <Text
+                      className={`font-barlow-bold text-sm ${
+                        isActive ? "text-quaternary" : "text-primary"
+                      }`}
+                      numberOfLines={1}
+                    >
+                      {module.titulo.toUpperCase()}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          )}
         </View>
       </View>
     </>

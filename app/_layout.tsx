@@ -4,8 +4,9 @@ import * as WebBrowser from 'expo-web-browser';
 // ⚠️ SOLO UNA VEZ
 WebBrowser.maybeCompleteAuthSession();
 
+import { ModuleProvider } from '@/src/context/ModuleContext';
 import { useFonts } from 'expo-font';
-import { Slot, SplashScreen } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 import React, { useEffect } from 'react';
 import "./global.css";
 
@@ -26,7 +27,13 @@ const RootLayout = () => {
 
   if (!fontsLoaded && !error) return null;
 
-  return <Slot />
+  return (
+    <ModuleProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+    </ModuleProvider>
+  );
 }
 
 export default RootLayout
