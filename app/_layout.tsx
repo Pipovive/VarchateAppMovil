@@ -1,9 +1,8 @@
 // app/_layout.tsx
 import * as WebBrowser from 'expo-web-browser';
-
-// ⚠️ SOLO UNA VEZ
 WebBrowser.maybeCompleteAuthSession();
 
+import { LessonProvider } from '@/src/context/LessonContext';
 import { ModuleProvider } from '@/src/context/ModuleContext';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
@@ -21,7 +20,6 @@ const RootLayout = () => {
 
   useEffect(() => {
     if (error) throw error;
-
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error])
 
@@ -29,9 +27,11 @@ const RootLayout = () => {
 
   return (
     <ModuleProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+      <LessonProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </LessonProvider>
     </ModuleProvider>
   );
 }

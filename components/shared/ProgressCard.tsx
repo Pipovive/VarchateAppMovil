@@ -1,57 +1,71 @@
-import React from 'react';
+  import React from 'react';
 import { Text, View } from 'react-native';
 
 
-interface props {
+  interface ProgressCardProps {
     title: string;
     progress: number;
-    className?: string;
-    barColor ?: string;
-    bgColor ?: string;
-}
+    icon?: string;
+    lecciones_vistas?: number | null;
+    total_lecciones?: number | null;
+    evaluacion_aprobada?: boolean;
+    certificado_disponible?: boolean;
+  }
 
-const ProgressCard = ({title, progress, className, barColor='bg-primary-100', bgColor='bg-primary-400'}: props) => {
-  return (
-    <View className={`rounded-2xl mt-4 p-3 ${bgColor} ${className}`}>
-      
-      <Text className="font-barlow-bold text-2xl text-secondary mx-2">
-        {title}
-      </Text>
+  const ProgressCard = ({ 
+    title, 
+    progress, 
+    icon,
+    lecciones_vistas,
+    total_lecciones,
+    evaluacion_aprobada,
+    certificado_disponible 
+  }: ProgressCardProps) => {
+    return (
+      <View className="bg-primary-600 rounded-xl p-4 mb-3 border border-secondary-100/20">
+        <View className="flex-row items-center justify-between mb-2">
+          <View className="flex-row items-center flex-1">
+            {icon && (
+              <Text className="text-2xl mr-2">{icon}</Text>
+            )}
+            <Text className="font-barlow-bold text-secondary flex-1" numberOfLines={1}>
+              {title}
+            </Text>
+          </View>
+          
+          <Text className="font-barlow-bold text-primary-200 ml-2">
+            {progress}%
+          </Text>
+        </View>
 
-      <View
-        style={{
-          marginTop: 14,
-          backgroundColor: "#FFFFFF",  
-          borderRadius: 999,
-          paddingHorizontal: 8,
-          paddingVertical: 6,
-        }}
-      >
-        <View
-          style={{
-            height: 13,
-            borderRadius: 999,
-            overflow: "hidden",
-            backgroundColor: "transparent",
-          }}
-        >
-          <View
-            style={{
-              height: 13,
-              borderRadius: 10,
-              width: `${progress}%`,
-              backgroundColor: '#0099FF',
-            }}
+        {/* Barra de progreso */}
+        <View className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+          <View 
+            className="h-full bg-primary-200 rounded-full" 
+            style={{ width: `${progress}%` }}
           />
         </View>
+
+        {/* Info adicional */}
+        <View className="flex-row items-center justify-between mt-2">
+          {lecciones_vistas !== null && total_lecciones !== null && (
+            <Text className="text-xs text-secondary-100 font-barlow-medium">
+              📚 {lecciones_vistas}/{total_lecciones} lecciones
+            </Text>
+          )}
+          
+          <View className="flex-row gap-2">
+            {evaluacion_aprobada && (
+              <Text className="text-xs">✅ Evaluado</Text>
+            )}
+            {certificado_disponible && (
+              <Text className="text-xs">🏆 Certificado</Text>
+            )}
+          </View>
+        </View>
       </View>
+    );
+  };
 
-      <Text className="font-barlow-bold text-xl mt-2 text-secondary text-right">
-        {progress}%
-      </Text>
 
-    </View>
-  )
-}
-
-export default ProgressCard
+  export default ProgressCard

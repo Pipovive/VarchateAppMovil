@@ -1,27 +1,17 @@
 import CustomDrawerButton from "@/components/shared/customDrawer";
-import { useCurrentModule } from '@/src/context/ModuleContext';
-import { useLessonViewModel } from "@/src/viewmodels/LessonViewModel";
+import { useLessons } from "@/src/context/LessonContext";
+import { useCurrentModule } from "@/src/context/ModuleContext";
 import { DrawerContentComponentProps, DrawerContentScrollView } from "@react-navigation/drawer";
+import { router } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import React, { useEffect } from "react";
-import { ActivityIndicator, GestureResponderEvent, Text, View } from "react-native";
-
-import { useModuleViewModel } from '@/src/viewmodels/ModuleViewModel';
-
+import { ActivityIndicator, Text, View } from "react-native";
 
 export default function CompetitionLayout() {
   return (
     <Drawer
       screenOptions={{
         headerShown: false,
-        headerStyle: {
-          backgroundColor: "#AFCBFF",
-        },
-        headerTintColor: "#fff",
-        headerTitleStyle: {
-          fontFamily: "Barlow-Bold",
-          fontSize: 18,
-        },
         drawerStyle: {
           backgroundColor: "#EAF4FF",
           width: 280,
@@ -31,36 +21,24 @@ export default function CompetitionLayout() {
     >
       <Drawer.Screen
         name="competition/[slug]"
-        options={{
-          title: "Introducción",
-          drawerLabel: "Introducción"
-        }}
+        options={{ title: "Introducción", drawerLabel: "Introducción" }}
       />
-
       <Drawer.Screen
         name="lesson/[id]"
-        options={{
-          title: "Lecciones",
-          drawerLabel: "Lecciones"
-        }}
+        options={{ title: "Lección", drawerLabel: "Lección" }}
       />
-
       <Drawer.Screen
         name="evaluate/index"
-        options={{
-          title: "Evaluación",
-          drawerLabel: "Evaluación"
-        }}
+        options={{ title: "Evaluación", drawerLabel: "Evaluación" }}
       />
     </Drawer>
   );
 }
 
-// ✅ CustomContent FUERA del componente principal
 function CustomContent(props: DrawerContentComponentProps) {
-   const { selectedModule, fetchModuleBySlug } = useModuleViewModel();
   const currentRoute = props.state.routeNames[props.state.index];
-   const { setCurrentModule } = useCurrentModule();  // ← AGREGAR ESTO
+
+  // 🎣 Obtener módulo y lecciones del contexto
   const { currentModule } = useCurrentModule();
   const {
     lessons,
@@ -68,72 +46,72 @@ function CustomContent(props: DrawerContentComponentProps) {
     loading,
     error,
     fetchLessons
-  } = useLessonViewModel();
+  } = useLessons();
 
+  // 📚 Cargar lecciones cuando hay módulo
   useEffect(() => {
-    console.log('═══════════════════════════════════');
-    console.log('🔍 DRAWER - useEffect ejecutado');
-    console.log('currentModule:', currentModule);
-    console.log('currentModule?.slug:', currentModule?.slug);
-    console.log('lessons.length:', lessons.length);
-    console.log('loading:', loading);
-    console.log('error:', error);
-    console.log('═══════════════════════════════════');
-
-    if (currentModule && lessons.length === 0 && !loading) {  // ← AGREGADO: verificar que no haya lecciones
-      console.log('✅ Módulo existe y no hay lecciones, cargando...');
-      console.log('📚 Llamando fetchLessons con slug:', currentModule.slug);
-
-      fetchLessons(currentModule.slug)
-        .then((data) => {
-          console.log('✅ fetchLessons completado');
-          console.log('Data recibida:', data);
-          console.log('Lecciones:', data?.lecciones);
-        })
-        .catch((err) => {
-          console.log('❌ Error en fetchLessons:', err);
-          console.log('Error response:', err.response?.data);
-        });
-    } else {
-      console.log('⚠️ Condiciones no cumplidas:');
-      console.log('  - selectedModule:', !!currentModule);
-      console.log('  - lessons.length:', lessons.length);
-      console.log('  - loading:', loading);
+    if (currentModule && lessons.length === 0 && !loading) {
+      console.log('📚 Drawer: Cargando lecciones del módulo', currentModule.slug);
+      fetchLessons(currentModule.slug);
     }
-  }, [currentModule, lessons.length]);  // ← CAMBIO: Agregar lessons.length como dependencia
+  }, [currentModule, lessons.length]);
 
-  function handleEvaluatePress(event: GestureResponderEvent): void {
-    throw new Error("Function not implemented.");
-  }
+  // 🎯 Navegar a introducción
+  const handleIntroPress = () => {
+    if (!currentModule) {
+      console.log('⚠️ No hay módulo seleccionado');
+      return;
+    }
+    router.push(`/(tabs)/(drawer)/competition/${currentModule.slug}`);
+  };
 
-  function handleIntroPress(event: GestureResponderEvent): void {
-    throw new Error("Function not implemented.");
-  }
+  // 🎯 Navegar a lección
+  const handleLessonPress = (lesson: any) => {
+    if (!lesson.disponible) {
+      alert(`🔒 Esta lección está bloqueada.\n\nCompleta la lección anterior primero.`);
+      return;
+    }
 
-  // ... resto del código (handleLessonPress, etc.)
+    if (!currentModule) {
+      alert('❌ No hay módulo seleccionado');
+      return;
+    }
+
+    console.log('📖 Navegando a lección:', lesson.id);
+    router.push({
+      pathname: '/(tabs)/(drawer)/lesson/[id]',
+      params: {
+        id: lesson.id.toString(),
+        moduleSlug: currentModule.slug
+      }
+    });
+  };
+
+  // 🎯 Navegar a evaluación
+  const handleEvaluatePress = () => {
+    if (!currentModule) {
+      alert('❌ No hay módulo seleccionado');
+      return;
+    }
+
+    if (statistics && statistics.completadas < statistics.disponibles) {
+      alert(
+        `⚠️ Debes completar todas las lecciones antes de la evaluación.\n\n` +
+        `Completadas: ${statistics.completadas}/${statistics.disponibles}`
+      );
+      return;
+    }
+
+    router.push('/(tabs)/(drawer)/evaluate');
+  };
 
   return (
     <DrawerContentScrollView
       {...props}
-      contentContainerStyle={{
-        paddingTop: 40,
-        paddingHorizontal: 0,
-      }}
+      contentContainerStyle={{ paddingTop: 40, paddingHorizontal: 0 }}
       style={{ backgroundColor: "#EAF4FF" }}
     >
       <View style={{ paddingTop: 24, paddingHorizontal: 16 }}>
-        {/* Debug info */}
-        <View style={{ 
-          marginBottom: 16, 
-          padding: 12, 
-          backgroundColor: '#FEF3C7',
-          borderRadius: 8 
-        }}>
-          <Text style={{ fontSize: 10, color: '#92400E' }}>
-            DEBUG: Module: {currentModule?.titulo || 'null'} | Lessons: {lessons.length} | Loading: {loading ? 'YES' : 'NO'}
-          </Text>
-        </View>
-
         {/* TÍTULO DEL MÓDULO */}
         {currentModule ? (
           <View style={{ marginBottom: 16 }}>
@@ -163,7 +141,7 @@ function CustomContent(props: DrawerContentComponentProps) {
               color: '#EF4444',
               fontFamily: 'Barlow-SemiBold'
             }}>
-              ⚠️ Selecciona un módulo primero
+              ⚠️ Selecciona un módulo
             </Text>
           </View>
         )}
@@ -192,10 +170,7 @@ function CustomContent(props: DrawerContentComponentProps) {
 
         {/* LECCIONES */}
         {loading ? (
-          <View style={{
-            paddingVertical: 20,
-            alignItems: 'center'
-          }}>
+          <View style={{ paddingVertical: 20, alignItems: 'center' }}>
             <ActivityIndicator size="small" color="#0099FF" />
             <Text style={{
               marginTop: 8,
@@ -207,10 +182,7 @@ function CustomContent(props: DrawerContentComponentProps) {
             </Text>
           </View>
         ) : error ? (
-          <View style={{
-            paddingVertical: 20,
-            paddingHorizontal: 8
-          }}>
+          <View style={{ paddingVertical: 20, paddingHorizontal: 8 }}>
             <Text style={{
               fontSize: 14,
               color: '#EF4444',
@@ -221,12 +193,8 @@ function CustomContent(props: DrawerContentComponentProps) {
             </Text>
           </View>
         ) : lessons.length > 0 ? (
-          lessons.map((lesson) => {
+          lessons.map((lesson: any) => {
             const isActive = currentRoute.includes("lesson");
-
-            function handleLessonPress(lesson: any): void {
-              throw new Error("Function not implemented.");
-            }
 
             return (
               <View key={lesson.id} style={{ marginBottom: 12 }}>
@@ -242,17 +210,14 @@ function CustomContent(props: DrawerContentComponentProps) {
             );
           })
         ) : (
-          <View style={{
-            paddingVertical: 20,
-            paddingHorizontal: 8
-          }}>
+          <View style={{ paddingVertical: 20, paddingHorizontal: 8 }}>
             <Text style={{
               fontSize: 14,
               color: '#6B7280',
               textAlign: 'center',
               fontFamily: 'Barlow-Regular'
             }}>
-              {currentModule ? 'No hay lecciones disponibles' : 'Selecciona un módulo para ver las lecciones'}
+              {currentModule ? 'No hay lecciones disponibles' : 'Selecciona un módulo'}
             </Text>
           </View>
         )}
@@ -263,6 +228,7 @@ function CustomContent(props: DrawerContentComponentProps) {
             <CustomDrawerButton
               variant={currentRoute.includes("evaluate") ? "active" : "no-active"}
               onPress={handleEvaluatePress}
+              locked={!currentModule || (statistics && statistics.completadas < statistics.disponibles)}
             >
               🎯 Evaluación
             </CustomDrawerButton>

@@ -1,7 +1,7 @@
 import { TopProgressHeader } from '@/components/shared/headerProgress';
 import { WhiteScreenContainer } from '@/components/shared/whiteScreenCard';
+import { useLessons } from "@/src/context/LessonContext"; // ← CAMBIAR IMPORT
 import { useCurrentModule } from '@/src/context/ModuleContext';
-import { useLessonViewModel } from '@/src/viewmodels/LessonViewModel';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import {
@@ -29,7 +29,7 @@ const LessonDetailScreen = () => {
         fetchLessonById,
         fetchNavigation,
         markAsViewed
-    } = useLessonViewModel();
+    } = useLessons();
 
     // ✅ UN SOLO useEffect (eliminar el duplicado)
     useEffect(() => {

@@ -17,7 +17,7 @@ const MODULE_IMAGES: Record<string, any> = {
 
 const HomeScreen = () => {
   const router = useRouter();
-  
+
   // 🎣 Usar el ViewModel
   const { modules, loading, error, fetchModules } = useModuleViewModel();
 
@@ -29,29 +29,32 @@ const HomeScreen = () => {
 
   // 📱 Navegar al módulo seleccionado
   const handlePress = (slug: string) => {
-    console.log('📱 Navegando a:', slug);
-    router.push(`/(tabs)/(drawer)/competition/${slug}`);
-  };
+  console.log('📱 Navegando a:', slug);
+  router.push({
+    pathname: '/(tabs)/(drawer)/competition/[slug]',
+    params: { slug: slug }
+  });
+};
 
   // 🖼️ Obtener imagen según el módulo
   const getModuleImage = (moduleName: string) => {
     // Convertir a minúsculas y quitar espacios
     const key = moduleName.toLowerCase().replace(/\s+/g, '-');
-    
+
     // Buscar coincidencia exacta o parcial
     if (MODULE_IMAGES[key]) {
       return MODULE_IMAGES[key];
     }
-    
+
     // Buscar si el key está contenido en alguna imagen
-    const foundKey = Object.keys(MODULE_IMAGES).find(k => 
+    const foundKey = Object.keys(MODULE_IMAGES).find(k =>
       key.includes(k) || k.includes(key)
     );
-    
+
     if (foundKey) {
       return MODULE_IMAGES[foundKey];
     }
-    
+
     // Imagen por defecto si no se encuentra
     return require("../../../assets/images/diagrama-de-flujo.png");
   };
@@ -59,21 +62,22 @@ const HomeScreen = () => {
   // 🔄 Pantalla de carga
   if (loading && modules.length === 0) {
     return (
-      <View style={{ 
-        flex: 1, 
-        backgroundColor: '#F2F2F2', 
-        justifyContent: 'center', 
-        alignItems: 'center' 
+      <View style={{
+        flex: 1,
+        backgroundColor: '#F2F2F2',
+        justifyContent: 'center',
+        alignItems: 'center'
       }}>
         <ActivityIndicator size="large" color="#0099FF" />
-        <Text style={{ 
-          marginTop: 12, 
-          fontSize: 16, 
+        <Text style={{
+          marginTop: 12,
+          fontSize: 16,
           color: '#6B7280',
           fontFamily: 'Barlow-Medium'
         }}>
           Cargando módulos...
         </Text>
+
       </View>
     );
   }
@@ -81,17 +85,17 @@ const HomeScreen = () => {
   // ❌ Pantalla de error
   if (error && modules.length === 0) {
     return (
-      <View style={{ 
-        flex: 1, 
-        backgroundColor: '#F2F2F2', 
-        justifyContent: 'center', 
+      <View style={{
+        flex: 1,
+        backgroundColor: '#F2F2F2',
+        justifyContent: 'center',
         alignItems: 'center',
         padding: 24
       }}>
         <Text style={{ fontSize: 48, marginBottom: 16 }}>😕</Text>
-        <Text style={{ 
-          fontSize: 18, 
-          color: '#EF4444', 
+        <Text style={{
+          fontSize: 18,
+          color: '#EF4444',
           marginBottom: 16,
           textAlign: 'center',
           fontFamily: 'Barlow-SemiBold'
@@ -110,21 +114,21 @@ const HomeScreen = () => {
 
   // ✅ Pantalla principal
   return (
-    <View style={{ 
-      flex: 1, 
-      backgroundColor: '#F2F2F2', 
-      paddingHorizontal: 16, 
-      paddingTop: 40 
+    <View style={{
+      flex: 1,
+      backgroundColor: '#F2F2F2',
+      paddingHorizontal: 16,
+      paddingTop: 40
     }}>
       <Text className="font-barlow-bold text-center text-2xl mt-4 mb-6">
         COMPETENCIAS
       </Text>
 
-      <ScrollView 
-        contentContainerStyle={{ 
-          flexDirection: 'row', 
-          flexWrap: 'wrap', 
-          gap: 16, 
+      <ScrollView
+        contentContainerStyle={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 16,
           justifyContent: 'space-between',
           paddingBottom: 20
         }}
@@ -138,16 +142,16 @@ const HomeScreen = () => {
             source={getModuleImage(item.modulo)}  // ← Usa el campo 'modulo' de la API
             onPress={() => handlePress(item.slug)}
           >
-            {item.titulo} 
+            {item.titulo}
           </Button>
         ))}
       </ScrollView>
 
       {/* Indicador de recarga si está cargando pero ya hay datos */}
       {loading && modules.length > 0 && (
-        <View style={{ 
-          position: 'absolute', 
-          top: 100, 
+        <View style={{
+          position: 'absolute',
+          top: 100,
           alignSelf: 'center',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
           paddingHorizontal: 16,

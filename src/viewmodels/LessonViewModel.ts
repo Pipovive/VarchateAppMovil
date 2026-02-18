@@ -75,54 +75,41 @@ export const useLessonViewModel = () => {
     /**
      * Obtener todas las lecciones de un módulo
      */
-    const fetchLessons = async (moduleSlug: string) => {  // ← Cambiar de number a string
+    const fetchLessons = async (moduleSlug: string) => {
         try {
             setLoading(true);
             setError(null);
 
-            console.log('🚀 Obteniendo lecciones del módulo:', moduleSlug);
+            const data = await getModuleLessons(moduleSlug);
 
-            const data: LessonsResponse = await getModuleLessons(moduleSlug);  // ← Enviar slug
+            console.log('✅ Lecciones obtenidas en ViewModel:', data.lecciones.length);
 
-            if (!data || !data.lecciones) {
-                throw new Error('Formato de datos inválido');
-            }
+            // ✅ IMPORTANTE: Actualizar el estado
+            setLessons(data.lecciones);  // ← Asegúrate de que esto esté
+            setStatistics({
+                vistas: data.estadisticas.vistas,
+                disponibles: data.estadisticas.disponibles,
+                completadas: data.estadisticas.completadas
+            });
 
-            console.log(`✅ ${data.total} lecciones obtenidas`);
-            console.log('📊 Estadísticas:', data.estadisticas);
-
-            setLessons(data.lecciones);
-            setStatistics(data.estadisticas);
-
-            return data;
-
-        } catch (err: any) {
-            console.error('❌ Error en fetchLessons:', err);
-
-            const errorMessage =
-                err?.response?.status === 404 ? 'Módulo no encontrado' :
-                    err?.response?.status === 401 ? 'Debes iniciar sesión' :
-                        err?.response?.data?.error ||
-                        err?.response?.data?.message ||
-                        err.message ||
-                        'Error al obtener lecciones';
-
-            setError(errorMessage);
-            throw err;
-
-        } finally {
             setLoading(false);
+            return data;
+        } catch (err: any) {
+            console.error('❌ Error al obtener lecciones:', err);
+            setError(err.response?.data?.error || 'Error al cargar lecciones');
+            setLoading(false);
+            throw err;
         }
     };
 
     /**
      * Obtener una lección específica por ID
      */
-     const fetchLessonById = async (moduleSlug: string, lessonId: number) => {  // ← Cambiar primer parámetro
+    const fetchLessonById = async (moduleSlug: string, lessonId: number) => {  // ← Cambiar primer parámetro
         try {
             setLoading(true);
             setError(null);
-            
+
             console.log(`🚀 Obteniendo lección ${lessonId} del módulo ${moduleSlug}`);
 
             const data = await getLessonById(moduleSlug, lessonId);  // ← Enviar slug
@@ -134,21 +121,21 @@ export const useLessonViewModel = () => {
             console.log(`✅ Lección obtenida: ${data.leccion.titulo}`);
 
             setSelectedLesson(data.leccion);
-            
+
             return data.leccion;
 
         } catch (err: any) {
             console.error('❌ Error en fetchLessonById:', err);
-            
-            const errorMessage = 
+
+            const errorMessage =
                 err?.response?.status === 404 ? 'Lección no encontrada' :
-                err?.response?.status === 403 ? err?.response?.data?.error || 'Acceso denegado' :
-                err?.response?.status === 401 ? 'Debes iniciar sesión' :
-                err?.response?.data?.error || 
-                err?.response?.data?.message || 
-                err.message || 
-                'Error al obtener lección';
-            
+                    err?.response?.status === 403 ? err?.response?.data?.error || 'Acceso denegado' :
+                        err?.response?.status === 401 ? 'Debes iniciar sesión' :
+                            err?.response?.data?.error ||
+                            err?.response?.data?.message ||
+                            err.message ||
+                            'Error al obtener lección';
+
             setError(errorMessage);
             throw err;
 
@@ -168,9 +155,9 @@ export const useLessonViewModel = () => {
 
             console.log('✅ Lección marcada como vista');
 
-            setLessons(prevLessons => 
-                prevLessons.map(lesson => 
-                    lesson.id === lessonId 
+            setLessons(prevLessons =>
+                prevLessons.map(lesson =>
+                    lesson.id === lessonId
                         ? { ...lesson, vista: true, estado: 'completada' }
                         : lesson
                 )
@@ -196,7 +183,7 @@ export const useLessonViewModel = () => {
             console.log('✅ Navegación obtenida:', data);
 
             setNavigation(data);
-            
+
             return data;
 
         } catch (err: any) {

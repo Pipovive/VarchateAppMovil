@@ -8,9 +8,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // baseURL: 'http://192.168.101.9:8000/api', 
 // casa lina 192.168.20.27
 // 10.32.22.221
+// 10.32.23.100
 
 const api = axios.create({
-  baseURL: 'http://10.32.22.221:8000/api',
+  baseURL: 'http://192.168.20.27:8000/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

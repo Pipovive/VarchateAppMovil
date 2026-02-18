@@ -1,125 +1,47 @@
 import { TopProgressHeader } from "@/components/shared/headerProgress";
 import { ModuleHeader } from "@/components/shared/moduleHeader";
 import { WhiteScreenContainer } from "@/components/shared/whiteScreenCard";
-import { useCurrentModule } from "@/src/context/ModuleContext";
-import { useLessonViewModel } from "@/src/viewmodels/LessonViewModel";
-import { useModuleViewModel } from "@/src/viewmodels/ModuleViewModel";
+import { useLessons } from "@/src/context/LessonContext";
+import { getModuleBySlug } from "@/src/services/modulesServices";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function CompetitionScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
-  const { setCurrentModule } = useCurrentModule();
+
+  const [selectedModule, setSelectedModule] = useState<any>(null);
+  const [moduleLoading, setModuleLoading] = useState(false);
+
+  const { lessons, loading: lessonsLoading, fetchLessons } = useLessons();
 
   useEffect(() => {
-    if (slug && typeof slug === 'string') {
-      console.log('🚀 Cargando módulo:', slug);
-      fetchModuleBySlug(slug);
-    }
+    if (!slug) return;
+
+    // Cargar módulo
+    setModuleLoading(true);
+    getModuleBySlug(slug as string)
+      .then((data) => {
+        setSelectedModule(data);
+        setModuleLoading(false);
+      })
+      .catch(() => setModuleLoading(false));
+
+    // Cargar lecciones
+    fetchLessons(slug as string);
+
   }, [slug]);
 
-  useEffect(() => {
-    if (selectedModule) {
-      console.log('💾 Guardando módulo en Context:', selectedModule.titulo);
-      setCurrentModule(selectedModule);
-    }
-  }, [setCurrentModule]);
-
-  // 🎣 ViewModels
-  const { selectedModule, loading, error, fetchModuleBySlug } = useModuleViewModel();
-  const {
-    lessons,
-    fetchLessons,
-    getNextAvailableLesson
-  } = useLessonViewModel();
-
-  // 🚀 Cargar módulo cuando cambie el slug
-  useEffect(() => {
-    if (slug && typeof slug === 'string') {
-      console.log('🚀 Cargando módulo:', slug);
-      fetchModuleBySlug(slug);
-    }
-  }, [slug]);
-
-  // 📚 Cargar lecciones cuando se cargue el módulo
-  useEffect(() => {
-    if (selectedModule) {
-      console.log('📚 Cargando lecciones del módulo:', selectedModule.slug);  // ← Usar slug
-      fetchLessons(selectedModule.slug);  // ← Enviar slug en lugar de ID
-    }
-  }, [selectedModule]);
-
-  // ❌ Validación de slug
-  if (!slug || typeof slug !== 'string') {
+  if (moduleLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Error: Slug inválido</Text>
-      </View>
-    );
-  }
-
-  // 🔄 Pantalla de carga
-  if (loading && !selectedModule) {
-    return (
-      <View style={{
-        flex: 1,
-        backgroundColor: '#EAF4FF',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EAF4FF' }}>
         <ActivityIndicator size="large" color="#0099FF" />
-        <Text style={{
-          marginTop: 12,
-          fontSize: 16,
-          color: '#6B7280',
-          fontFamily: 'Barlow-Medium'
-        }}>
-          Cargando módulo...
-        </Text>
+        <Text style={{ marginTop: 12, color: '#6B7280' }}>Cargando...</Text>
       </View>
     );
   }
 
-  // ❌ Pantalla de error
-  if (error && !selectedModule) {
-    return (
-      <View style={{
-        flex: 1,
-        backgroundColor: '#EAF4FF',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 24
-      }}>
-        <Text style={{ fontSize: 48, marginBottom: 16 }}>😕</Text>
-        <Text style={{
-          fontSize: 18,
-          color: '#EF4444',
-          marginBottom: 16,
-          textAlign: 'center',
-          fontFamily: 'Barlow-SemiBold'
-        }}>
-          {error}
-        </Text>
-        <TouchableOpacity
-          onPress={() => fetchModuleBySlug(slug)}
-          style={{
-            backgroundColor: '#0099FF',
-            paddingHorizontal: 24,
-            paddingVertical: 12,
-            borderRadius: 8
-          }}
-        >
-          <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>
-            Reintentar
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  // ⚠️ Sin módulo
   if (!selectedModule) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -128,64 +50,6 @@ export default function CompetitionScreen() {
     );
   }
 
-  // 📋 Lecciones de ejemplo (mantén estas temporalmente hasta cargar de la API)
-  const lessonsPlaceholder = [
-    {
-      title: "Lección 1 – ¿Qué es programar? Conceptos básicos",
-      desc: "Descubrirás qué significa programar, qué son los algoritmos y cómo se comunican con la computadora.",
-    },
-    {
-      title: "Lección 2 – Tipos de datos y variables",
-      desc: "Conocerás cómo almacenar y manipular información dentro de un programa.",
-    },
-    {
-      title: "Lección 3 – Operadores y expresiones",
-      desc: "Aprenderás a realizar cálculos y operaciones lógicas.",
-    },
-    {
-      title: "Lección 4 – Condicionales (if/else, switch)",
-      desc: "Descubrirás cómo tomar decisiones en un programa según condiciones.",
-    },
-    {
-      title: "Evaluación",
-      desc: "Pondrás en práctica los fundamentos de programación con ejercicios sencillos.",
-    },
-  ];
-
-  // 🎯 Función para manejar el clic en "Siguiente"
-  const handleNextClick = () => {
-    if (!selectedModule) {
-      alert('Módulo no cargado');
-      return;
-    }
-
-    console.log('📋 Total de lecciones:', lessons.length);
-
-    let nextLesson = getNextAvailableLesson();
-
-    if (!nextLesson && lessons.length > 0) {
-      nextLesson = lessons.find(l => l.disponible) || lessons[0];
-    }
-
-    if (nextLesson) {
-      console.log('➡️ Navegando a lección:', nextLesson.titulo);
-      console.log('🔑 Lección ID:', nextLesson.id);
-      console.log('🔑 Módulo Slug:', selectedModule.slug);
-
-      // ✅ PASAR EL SLUG DEL MÓDULO COMO PARÁMETRO
-      router.push({
-        pathname: '/(tabs)/(drawer)/lesson/[id]',
-        params: {
-          id: nextLesson.id.toString(),
-          moduleSlug: selectedModule.slug  // ← NUEVO: Pasar el slug
-        }
-      });
-    } else {
-      alert('No hay lecciones disponibles en este módulo');
-    }
-  };
-
-  // ✅ Pantalla principal
   return (
     <View style={{ flex: 1, backgroundColor: '#EAF4FF' }}>
       <ScrollView
@@ -195,14 +59,12 @@ export default function CompetitionScreen() {
       >
         <TopProgressHeader
           title={selectedModule.titulo}
-          progress={0}
-          activeSlug={slug}
+          activeSlug={slug as string}
         />
 
         <WhiteScreenContainer>
           <ModuleHeader />
 
-          {/* Descripción del módulo */}
           <Text style={{
             fontSize: 16,
             lineHeight: 24,
@@ -213,42 +75,96 @@ export default function CompetitionScreen() {
             {selectedModule.descripcion_larga}
           </Text>
 
-          <Text className="text-2xl font-barlow-bold text-secondary mt-6 mb-4">
-            Contenido ({selectedModule.total_lecciones} lecciones)
+          <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#1F2937', marginTop: 24, marginBottom: 16 }}>
+            Contenido ({lessons.length} lecciones)
           </Text>
 
-          {/* Mostrar lecciones de la API o placeholder */}
-          {(lessons.length > 0 ? lessons : lessonsPlaceholder).map((lesson, index) => (
-            <TouchableOpacity
-              key={index}
-              className="bg-quaternary border border-secondary-200 p-4 rounded-2xl mb-4"
-              onPress={() => {
-                if ('id' in lesson) {
-                  // Lección de la API
+          {lessonsLoading ? (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <ActivityIndicator size="small" color="#0099FF" />
+              <Text style={{ color: '#6B7280', marginTop: 8 }}>Cargando lecciones...</Text>
+            </View>
+          ) : lessons.length > 0 ? (
+            lessons.map((lesson, index) => (
+              <TouchableOpacity
+                key={lesson.id}
+                style={{
+                  backgroundColor: 'white',
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  padding: 16,
+                  borderRadius: 16,
+                  marginBottom: 16,
+                  opacity: lesson.disponible ? 1 : 0.5
+                }}
+                onPress={() => {
+                  if (!lesson.disponible) {
+                    alert('Esta lección no está disponible aún');
+                    return;
+                  }
                   router.push({
                     pathname: '/(tabs)/(drawer)/lesson/[id]',
-                    params: { id: lesson.id.toString() }
+                    params: {
+                      id: lesson.id.toString(),
+                      moduleSlug: slug as string
+                    }
                   });
-                } else {
-                  // Placeholder
-                  alert('Lecciones aún no cargadas');
-                }
-              }}
-            >
-              <Text className="text-secondary font-barlow-bold text-lg">
-                {'titulo' in lesson ? lesson.titulo : lesson.title}
-              </Text>
-              <Text className="text-secondary-100 mt-1 font-barlow-medium">
-                {'desc' in lesson ? lesson.desc : ''}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                }}
+                disabled={!lesson.disponible}
+              >
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1F2937' }}>
+                  {index + 1}. {lesson.titulo}
+                </Text>
+                <View style={{ flexDirection: 'row', marginTop: 8, gap: 8 }}>
+                  {lesson.vista && (
+                    <View style={{ backgroundColor: '#10B981', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ fontSize: 10, color: '#FFF', fontWeight: '600' }}>✓ COMPLETADA</Text>
+                    </View>
+                  )}
+                  {!lesson.disponible && (
+                    <View style={{ backgroundColor: '#9CA3AF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ fontSize: 10, color: '#FFF', fontWeight: '600' }}>🔒 BLOQUEADA</Text>
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={{ padding: 20, alignItems: 'center', backgroundColor: '#FEF3C7', borderRadius: 8 }}>
+              <Text style={{ color: '#92400E', fontSize: 14 }}>No hay lecciones disponibles</Text>
+            </View>
+          )}
 
           <TouchableOpacity
-            className="bg-primary-200 mt-8 py-4 w-40 self-end rounded-2xl"
-            onPress={handleNextClick}
+            style={{
+              backgroundColor: '#0099FF',
+              marginTop: 32,
+              paddingVertical: 16,
+              width: 160,
+              alignSelf: 'flex-end',
+              borderRadius: 16,
+              opacity: lessons.length === 0 ? 0.5 : 1
+            }}
+            onPress={() => {
+              const nextLesson = lessons.find(l => l.disponible && !l.vista) ||
+                lessons.find(l => l.disponible) ||
+                lessons[0];
+
+              if (nextLesson) {
+                router.push({
+                  pathname: '/(tabs)/(drawer)/lesson/[id]',
+                  params: {
+                    id: nextLesson.id.toString(),
+                    moduleSlug: slug as string
+                  }
+                });
+              } else {
+                alert('No hay lecciones disponibles');
+              }
+            }}
+            disabled={lessons.length === 0}
           >
-            <Text className="text-center text-quaternary font-barlow-bold text-xl">
+            <Text style={{ textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: 18 }}>
               Siguiente
             </Text>
           </TouchableOpacity>
