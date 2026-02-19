@@ -1,8 +1,14 @@
+import { AVATARS } from '@/src/const/avatar';
+import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image } from 'react-native';
 
 const TabsLayout = () => {
+  const { user, loading: userLoading, error: userError, fetchUser } = useUserViewModel();
+  useEffect (() => {
+    fetchUser()
+  }, [])
   return (
     <Tabs
       screenOptions={{
@@ -80,7 +86,7 @@ const TabsLayout = () => {
           title: 'Perfil',
           tabBarIcon: () => (
             <Image
-              source={require('../../assets/images/foto-perfil.png')}
+              source={AVATARS[user?.avatar_id || 1]}
               style={{
                 width: 24,
                 height: 24,

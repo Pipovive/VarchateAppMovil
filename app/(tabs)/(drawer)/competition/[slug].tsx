@@ -2,6 +2,7 @@ import { TopProgressHeader } from "@/components/shared/headerProgress";
 import { ModuleHeader } from "@/components/shared/moduleHeader";
 import { WhiteScreenContainer } from "@/components/shared/whiteScreenCard";
 import { useLessons } from "@/src/context/LessonContext";
+import { useCurrentModule } from "@/src/context/ModuleContext";
 import { getModuleBySlug } from "@/src/services/modulesServices";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ export default function CompetitionScreen() {
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [moduleLoading, setModuleLoading] = useState(false);
 
+  const { setCurrentModule } = useCurrentModule();
   const { lessons, loading: lessonsLoading, fetchLessons } = useLessons();
 
   useEffect(() => {
@@ -24,6 +26,7 @@ export default function CompetitionScreen() {
     getModuleBySlug(slug as string)
       .then((data) => {
         setSelectedModule(data);
+        setCurrentModule(data); // ✅ Guardar en contexto
         setModuleLoading(false);
       })
       .catch(() => setModuleLoading(false));

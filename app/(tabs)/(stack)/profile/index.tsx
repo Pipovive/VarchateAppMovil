@@ -1,4 +1,5 @@
 import ProgressCard from '@/components/shared/ProgressCard';
+import { AVATARS } from '@/src/const/avatar';
 import { useModuleViewModel } from '@/src/viewmodels/ModuleViewModel';
 import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -8,7 +9,6 @@ import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } fr
 
 const ProfileScreen = () => {
   const router = useRouter();
-  
   const { user, loading: userLoading, error: userError, fetchUser } = useUserViewModel();
   const { 
     modulesWithProgress, 
@@ -61,7 +61,7 @@ const ProfileScreen = () => {
       <View className='items-center justify-center'>
         <Image
           style={{ width: 160, resizeMode: 'contain', marginTop: 6, borderRadius: 50, height: 160 }}
-          source={require('../../../../assets/images/gato-perfil.png')}
+          source={AVATARS[user?.avatar_id || 1]}
         />
 
         <Text className='font-barlow-medium text-center mb-3 text-2xl text-secondary'>

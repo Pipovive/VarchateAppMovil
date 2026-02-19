@@ -2,8 +2,10 @@ import { TopProgressHeader } from '@/components/shared/headerProgress';
 import { WhiteScreenContainer } from '@/components/shared/whiteScreenCard';
 import { useLessons } from "@/src/context/LessonContext"; // ← CAMBIAR IMPORT
 import { useCurrentModule } from '@/src/context/ModuleContext';
+import { getModuleBySlug } from "@/src/services/modulesServices";
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
+
 import {
     ActivityIndicator,
     ScrollView,
@@ -20,7 +22,7 @@ const LessonDetailScreen = () => {
         moduleSlug?: string;
     }>();
 
-    const { currentModule } = useCurrentModule();  // ← IMPORTAR DESDE CONTEXT
+    const { currentModule, setCurrentModule } = useCurrentModule(); // ← IMPORTAR DESDE CONTEXT
     const {
         selectedLesson,
         navigation,
@@ -30,6 +32,7 @@ const LessonDetailScreen = () => {
         fetchNavigation,
         markAsViewed
     } = useLessons();
+
 
     // ✅ UN SOLO useEffect (eliminar el duplicado)
     useEffect(() => {
@@ -71,8 +74,22 @@ const LessonDetailScreen = () => {
                 console.log('⚠️ No se pudo cargar navegación (no crítico)');
             });
         }
-    }, [id, moduleSlug, currentModule]);
+    }, [id, moduleSlug]);
+    useEffect(() => {
+        if (selectedLesson && selectedLesson.modulo.slug) {
+            console.log('💾 Cargando módulo completo:', selectedLesson.modulo.slug);
 
+            getModuleBySlug(selectedLesson.modulo.slug)
+                .then((module) => {
+                    console.log('✅ Módulo completo cargado:', module.titulo);
+                    setCurrentModule(module);
+                })
+                .catch((err) => {
+                    console.log('⚠️ No se pudo cargar módulo completo:', err);
+                });
+        }
+    }, [selectedLesson]);
+   
     const handleScrollEnd = () => {
         if (selectedLesson) {
             const slug = moduleSlug || currentModule?.slug;
@@ -166,8 +183,7 @@ const LessonDetailScreen = () => {
             >
                 <TopProgressHeader
                     title={selectedLesson.titulo}
-                    progress={0}
-                    activeSlug={selectedLesson.slug}
+                    activeSlug={selectedLesson.modulo.slug}  // ← Usa el slug del MÓDULO, no de la lección
                 />
 
                 <WhiteScreenContainer>
