@@ -51,7 +51,22 @@ const StackProfile = () => {
                     headerShown: false,
 
                 }} />
-
+            <Stack.Screen
+                name='certificado'
+                options={{
+                    title: 'Certificado',
+                    headerShown: false, // Ya tiene header custom
+                    presentation: 'card',
+                }} 
+            />
+            <Stack.Screen
+                name='rankin/index'
+                options={{
+                    title: 'Certificado',
+                    headerShown: false, // Ya tiene header custom
+                    presentation: 'card',
+                }} 
+            />
 
         </Stack>
     )

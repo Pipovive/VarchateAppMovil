@@ -53,7 +53,11 @@ export const useAssessmentViewModel = () => {
         try {
             setLoading(true);
             setError(null);
-
+            // Limpiar intento anterior sin usar reset() completo
+            setIntentoActual(null);
+            setResultadoFinal(null);
+            setPreguntaActualIndex(0);
+            setRespuestasGuardadas({});
             const estadoResp = await obtenerEstadoEvaluacion(moduloId);
 
             if (!estadoResp.success || !estadoResp.data) {
@@ -82,7 +86,7 @@ export const useAssessmentViewModel = () => {
             // Caso 3: Tiene intento en progreso → reanudar
             if (estado.tiene_intento_en_progreso) {
                 const inProgressResp = await obtenerIntentoEnProgreso(moduloId);
-                console.log('EN-PROGRESO RESP:', JSON.stringify(inProgressResp, null, 2));
+
                 if (!inProgressResp.success || !inProgressResp.data) {
                     // Si el intento expiró en el servidor, intentar iniciar uno nuevo
                     return await _iniciarNuevo(moduloId);
@@ -90,17 +94,26 @@ export const useAssessmentViewModel = () => {
 
                 const data = inProgressResp.data;
 
+                const instruccionesPorTipo: Record<string, string> = {
+                    seleccion_multiple: 'Selecciona la respuesta correcta.',
+                    verdadero_falso: 'Indica si la afirmación es verdadera o falsa.',
+                    arrastrar_soltar: 'Relaciona cada elemento con su definición correspondiente.',
+                };
+
                 // Adaptar la respuesta de en-progreso al formato de IntentoEvaluacion
                 const intentoAdaptado: IntentoEvaluacion = {
                     intento_id: data.intento_id,
                     evaluacion_id: data.evaluacion_id,
-                    modulo_id: data.modulo_id,
+                    modulo_id: Number(data.modulo_id),
                     fecha_inicio: data.fecha_inicio,
                     tiempo_limite_minutos: Math.ceil(data.tiempo_restante_segundos / 60),
-                    tiempo_limite_segundos: data.tiempo_restante_segundos,
+                    tiempo_limite_segundos: Math.floor(data.tiempo_restante_segundos),
                     puntaje_minimo: estadoResp.data.evaluacion?.puntaje_minimo ?? 70,
                     numero_preguntas: data.preguntas_totales,
-                    preguntas: data.preguntas,
+                    preguntas: data.preguntas.map((p: any) => ({
+                        ...p,
+                        instrucciones: p.instrucciones ?? instruccionesPorTipo[p.tipo] ?? '',
+                    })),
                     intento_numero: estadoResp.data.estado_usuario.intentos_completados + 1,
                 };
 

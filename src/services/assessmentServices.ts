@@ -113,7 +113,8 @@ export const iniciarEvaluacion = async (moduloId: number) => {
  */
 export const obtenerEstadoEvaluacion = async (moduloId: number) => {
     const response = await api.get(`/modulos/${moduloId}/evaluacion/estado`);
-    return response.data;
+    return response.data; // ← esto ya es { success, data: { evaluacion, estado_usuario... } }
+    
 };
 
 /**

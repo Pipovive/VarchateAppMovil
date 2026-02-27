@@ -45,23 +45,16 @@ export const AssessmentModal = ({ moduloId, moduloTitulo }: AssessmentModalProps
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
     // ─── Temporizador ────────────────────────────────────────────────────────
+    // Cambiar el useEffect a esto:
     useEffect(() => {
-        if (!intentoActual || showResults) return;
+        if (!intentoActual || showResults || tiempoRestante <= 0) return;
 
-        timerRef.current = setInterval(() => {
-            setTiempoRestante(prev => {
-                if (prev <= 1) {
-                    handleTimeUp();
-                    return 0;
-                }
-                return prev - 1;
-            });
+        const interval = setInterval(() => {
+            setTiempoRestante(prev => prev - 1);
         }, 1000);
 
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
-    }, [intentoActual, showResults]);
+        return () => clearInterval(interval);
+    }, [intentoActual?.intento_id]);
 
     const stopTimer = () => {
         if (timerRef.current) {
@@ -70,24 +63,23 @@ export const AssessmentModal = ({ moduloId, moduloTitulo }: AssessmentModalProps
         }
     };
 
-    const handleTimeUp = async () => {
-        stopTimer();
-        Alert.alert('⏰ Tiempo agotado', 'La evaluación se finalizará automáticamente.');
-        await handleFinish();
-    };
+    useEffect(() => {
+        if (tiempoRestante === 0 && intentoActual && !showResults) {
+            handleFinish();
+        }
+    }, [tiempoRestante]);
 
     // ─── Abrir modal ─────────────────────────────────────────────────────────
     const handleOpenModal = async () => {
-        reset();
+        // No hacer reset() aquí — causa el estado inconsistente
         setShowResults(false);
         setSelectedOption(null);
+        setModalVisible(true);
 
         try {
             const resultado = await loadAssessment(moduloId);
-            setModalVisible(true);
 
             if (resultado === 'reanudado') {
-                // setTimeout para que el modal termine de renderizar antes del Alert
                 setTimeout(() => {
                     Alert.alert(
                         '▶️ Evaluación en progreso',
@@ -97,14 +89,11 @@ export const AssessmentModal = ({ moduloId, moduloTitulo }: AssessmentModalProps
                 }, 500);
             }
         } catch (err: any) {
+            console.log('ERROR EN handleOpenModal:', err?.message, err?._tipo, err?.response?.data);
             const mensaje = err?.message || 'No se pudo cargar la evaluación';
-            const esInfomativo = err?._tipo === 'informativo';
-
-            if (esInfomativo) {
-                Alert.alert('ℹ️ Evaluación', mensaje);
-            } else {
-                Alert.alert('Error', mensaje);
-            }
+            const esInformativo = err?._tipo === 'informativo';
+            setModalVisible(false);
+            Alert.alert(esInformativo ? 'ℹ️ Evaluación' : 'Error', mensaje);
         }
     };
 
@@ -224,7 +213,7 @@ export const AssessmentModal = ({ moduloId, moduloTitulo }: AssessmentModalProps
 
     const preguntaActual = getPreguntaActual();
     const progress = getProgress();
-
+    console.log('PREGUNTA ACTUAL:', JSON.stringify(getPreguntaActual()));
     // ─── Render ───────────────────────────────────────────────────────────────
     return (
         <>

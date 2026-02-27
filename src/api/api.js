@@ -11,7 +11,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 10.32.23.100
 
 const api = axios.create({
-  baseURL: 'http://10.32.18.116:8000/api',
+  //RECUERDA CAMBIAR LA API EXPOR BASE URL
+  baseURL: 'http://10.32.19.35:8000/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -95,5 +96,24 @@ export const getLessonNavigation = async (moduleId, lessonId) => {
   return response.data;
 };
 
+export const BASE_URL = 'http://10.32.19.35/api:8000';
+
+export const generarCertificacion = async (moduloId) => {
+    try {
+        const response = await api.post(`/modulos/${moduloId}/certificacion/generar`);
+        return response.data;
+    } catch (err) {
+        // Si ya tiene certificado, retornar como éxito
+        if (err?.response?.status === 400 && err?.response?.data?.data?.codigo_existente) {
+            return err.response.data;
+        }
+        throw err;
+    }
+};
+
+export const getMisCertificaciones = async () => {
+    const response = await api.get('/certificaciones');
+    return response.data;
+};
 
 export default api;

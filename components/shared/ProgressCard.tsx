@@ -1,8 +1,7 @@
-  import React from 'react';
-import { Text, View } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
-
-  interface ProgressCardProps {
+interface ProgressCardProps {
     title: string;
     progress: number;
     icon?: string;
@@ -10,62 +9,78 @@ import { Text, View } from 'react-native';
     total_lecciones?: number | null;
     evaluacion_aprobada?: boolean;
     certificado_disponible?: boolean;
-  }
+    moduloId?: number;
+    moduloSlug?: string;  // ✅ AGREGAR
+    generating?: boolean;
+    onVerCertificado?: (moduloId: number, moduloSlug: string) => void;  // ✅ CAMBIAR
+}
 
-  const ProgressCard = ({ 
-    title, 
-    progress, 
+const ProgressCard = ({
+    title,
+    progress,
     icon,
     lecciones_vistas,
     total_lecciones,
     evaluacion_aprobada,
-    certificado_disponible 
-  }: ProgressCardProps) => {
+    certificado_disponible,
+    moduloId,
+    moduloSlug,  // ✅ AGREGAR
+    generating,
+    onVerCertificado,
+}: ProgressCardProps) => {
     return (
-      <View className="bg-primary-600 rounded-xl p-4 mb-3 border border-secondary-100/20">
-        <View className="flex-row items-center justify-between mb-2">
-          <View className="flex-row items-center flex-1">
-            {icon && (
-              <Text className="text-2xl mr-2">{icon}</Text>
-            )}
-            <Text className="font-barlow-bold text-secondary flex-1" numberOfLines={1}>
-              {title}
-            </Text>
-          </View>
-          
-          <Text className="font-barlow-bold text-primary-200 ml-2">
-            {progress}%
-          </Text>
-        </View>
+        <View className="bg-primary-600 rounded-xl p-4 mb-3 border border-secondary-100/20">
+            <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center flex-1">
+                    {icon && <Text className="text-2xl mr-2">{icon}</Text>}
+                    <Text className="font-barlow-bold text-secondary flex-1" numberOfLines={1}>
+                        {title}
+                    </Text>
+                </View>
+                <Text className="font-barlow-bold text-primary-200 ml-2">{progress}%</Text>
+            </View>
 
-        {/* Barra de progreso */}
-        <View className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-          <View 
-            className="h-full bg-primary-200 rounded-full" 
-            style={{ width: `${progress}%` }}
-          />
-        </View>
+            {/* Barra de progreso */}
+            <View className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <View
+                    className="h-full bg-primary-200 rounded-full"
+                    style={{ width: `${progress}%` }}
+                />
+            </View>
 
-        {/* Info adicional */}
-        <View className="flex-row items-center justify-between mt-2">
-          {lecciones_vistas !== null && total_lecciones !== null && (
-            <Text className="text-xs text-secondary-100 font-barlow-medium">
-              📚 {lecciones_vistas}/{total_lecciones} lecciones
-            </Text>
-          )}
-          
-          <View className="flex-row gap-2">
-            {evaluacion_aprobada && (
-              <Text className="text-xs">✅ Evaluado</Text>
+            {/* Info adicional */}
+            <View className="flex-row items-center justify-between mt-2">
+                {lecciones_vistas !== null && total_lecciones !== null && (
+                    <Text className="text-xs text-secondary-100 font-barlow-medium">
+                        📚 {lecciones_vistas}/{total_lecciones} lecciones
+                    </Text>
+                )}
+                <View className="flex-row gap-2">
+                    {evaluacion_aprobada && (
+                        <Text className="text-xs">✅ Evaluado</Text>
+                    )}
+                </View>
+            </View>
+
+            {/* Botón certificado */}
+            {certificado_disponible && moduloId && moduloSlug && onVerCertificado && (  // ✅ AGREGAR moduloSlug &&
+                <TouchableOpacity
+                    onPress={() => onVerCertificado(moduloId, moduloSlug)}  // ✅ PASAR 2 PARÁMETROS
+                    disabled={generating}
+                    className="mt-3 bg-yellow-500 rounded-lg py-2 px-4 flex-row items-center justify-center"
+                    style={{ opacity: generating ? 0.7 : 1 }}
+                >
+                    {generating ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                        <Text className="text-white font-barlow-bold text-sm">
+                            🏆 Ver mi Certificado
+                        </Text>
+                    )}
+                </TouchableOpacity>
             )}
-            {certificado_disponible && (
-              <Text className="text-xs">🏆 Certificado</Text>
-            )}
-          </View>
         </View>
-      </View>
     );
-  };
+};
 
-
-  export default ProgressCard
+export default ProgressCard;

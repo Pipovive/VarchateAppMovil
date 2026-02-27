@@ -80,6 +80,23 @@ const TabsLayout = () => {
         }}
       />
 
+            <Tabs.Screen
+        name="rankin/index"
+        options={{
+          title: 'rankin',
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require('../../assets/images/iaW.png')}
+              style={{
+                width: focused ? 28 : 24,
+                height: focused ? 28 : 24,
+                resizeMode: 'contain',
+              }}
+            />
+          )
+        }}
+      />
+
       <Tabs.Screen
         name="(stack)"
         options={{
@@ -98,6 +115,9 @@ const TabsLayout = () => {
           ),
         }}
       />
+
+
+        
 
       {/* Oculta el drawer de los tabs */}
       <Tabs.Screen
