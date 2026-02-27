@@ -1,8 +1,11 @@
 import { useModuleViewModel } from "@/src/viewmodels/ModuleViewModel";
 import { Ionicons } from "@expo/vector-icons";
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+
 
 type Props = {
   title: string;
@@ -34,8 +37,11 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
     });
   };
 
+  const navigation = useNavigation<DrawerNavigationProp<any>>();
+
   const handleMenuPress = () => {
-    console.log('📱 Menu pressed (drawer opens with swipe)');
+    console.log('📱 Abriendo drawer...');
+    navigation.openDrawer();
   };
 
   // ✅ Obtener el progreso real del módulo activo

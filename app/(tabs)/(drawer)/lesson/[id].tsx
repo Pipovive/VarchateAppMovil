@@ -1,10 +1,12 @@
+import { ExerciseButton } from '@/components/exercises/ExerciseButton';
 import { TopProgressHeader } from '@/components/shared/headerProgress';
 import { WhiteScreenContainer } from '@/components/shared/whiteScreenCard';
 import { useLessons } from "@/src/context/LessonContext"; // ← CAMBIAR IMPORT
 import { useCurrentModule } from '@/src/context/ModuleContext';
 import { getModuleBySlug } from "@/src/services/modulesServices";
+import { useExerciseViewModel } from '@/src/viewmodels/ExcerciseViewModel';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     ActivityIndicator,
@@ -32,8 +34,29 @@ const LessonDetailScreen = () => {
         fetchNavigation,
         markAsViewed
     } = useLessons();
+    const { exerciseData, fetchExercises } = useExerciseViewModel();
+    const [hasRealExercises, setHasRealExercises] = useState(false);
+    const [checkingExercises, setCheckingExercises] = useState(false);
 
+    useEffect(() => {
+        // ✅ SIEMPRE verificar, sin importar lo que diga el backend
+        if (selectedLesson && selectedLesson.modulo?.id) {
+            setCheckingExercises(true);
 
+            fetchExercises(selectedLesson.modulo.id, selectedLesson.id)
+                .then((data) => {
+                    console.log('✅ Ejercicios encontrados:', data.ejercicios.length);
+                    setHasRealExercises(data.ejercicios.length > 0);
+                })
+                .catch((err) => {
+                    console.log('⚠️ No hay ejercicios o error:', err);
+                    setHasRealExercises(false);
+                })
+                .finally(() => {
+                    setCheckingExercises(false);
+                });
+        }
+    }, [selectedLesson]);
     // ✅ UN SOLO useEffect (eliminar el duplicado)
     useEffect(() => {
         if (id) {
@@ -89,7 +112,7 @@ const LessonDetailScreen = () => {
                 });
         }
     }, [selectedLesson]);
-   
+
     const handleScrollEnd = () => {
         if (selectedLesson) {
             const slug = moduleSlug || currentModule?.slug;
@@ -98,8 +121,16 @@ const LessonDetailScreen = () => {
                 console.log('✅ Marcando como vista...');
                 markAsViewed(slug, selectedLesson.id);
             }
+            console.log('🔍 selectedLesson.modulo:', selectedLesson.modulo);
         }
+
     };
+
+    console.log('🔍 selectedLesson completo:', selectedLesson);
+    console.log('🔍 tiene_ejercicios:', selectedLesson?.tiene_ejercicios);
+    console.log('🔍 cantidad_ejercicios:', selectedLesson?.cantidad_ejercicios);
+    console.log('🔍 modulo:', selectedLesson?.modulo);
+    console.log('🔍 modulo.id:', selectedLesson?.modulo?.id);
 
     if (loading && !selectedLesson) {
         return (
@@ -223,6 +254,7 @@ const LessonDetailScreen = () => {
                         </Text>
                     </View>
 
+                    {/* Badges informativos */}
                     <View style={{
                         flexDirection: 'row',
                         flexWrap: 'wrap',
@@ -256,6 +288,15 @@ const LessonDetailScreen = () => {
                         )}
                     </View>
 
+                    {/* Botón de ejercicios - FUERA del View anterior */}
+                    {hasRealExercises && (
+                        <ExerciseButton
+                            cantidadEjercicios={exerciseData?.ejercicios.length || 0}
+                            moduloId={selectedLesson.modulo.id}
+                            leccionId={selectedLesson.id}
+                        />
+                    )}
+
                     <View style={{
                         flexDirection: 'row',
                         justifyContent: 'space-between',
@@ -288,6 +329,7 @@ const LessonDetailScreen = () => {
                                     alignItems: 'center'
                                 }}
                             >
+
                                 <Text style={{ fontSize: 20, marginRight: 8 }}>←</Text>
                                 <View style={{ flex: 1 }}>
                                     <Text style={{ fontSize: 12, color: '#6B7280' }}>Anterior</Text>
