@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const CertificadoScreen = () => {
     const [imageLoading, setImageLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);  // ✅ AGREGAR
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
     const { codigo, modulo, porcentaje, fecha } = useLocalSearchParams<{
         codigo: string;
@@ -31,10 +31,18 @@ const CertificadoScreen = () => {
     const urlImagen = `${BASE_URL}/api/certificaciones/${codigo}/ver`;
     const urlDescargar = `${BASE_URL}/api/certificaciones/${codigo}/descargar`;
 
+    useEffect(() => {
+        const loadToken = async () => {
+            const storedToken = await AsyncStorage.getItem('token');
+            console.log('🔑 Token cargado:', storedToken ? 'SÍ' : 'NO');
+            setToken(storedToken);
+            setLoading(false);
+        };
+        loadToken();
+    }, []);
+
     const handleDescargar = () => {
-        Linking.openURL(urlDescargar).catch(() =>
-            Alert.alert('Error', 'No se pudo abrir el enlace.')
-        );
+        Alert.alert('Próximamente', 'La descarga estará disponible pronto.');
     };
 
     const handleCompartir = () => {
@@ -42,22 +50,9 @@ const CertificadoScreen = () => {
             Alert.alert('Error', 'No se pudo abrir el certificado.')
         );
     };
-
-    // ✅ CARGAR TOKEN ANTES DE RENDERIZAR
-    useEffect(() => {
-        const loadToken = async () => {
-            const storedToken = await AsyncStorage.getItem('token');
-            console.log('🔑 Token cargado:', storedToken ? 'SÍ' : 'NO');
-            setToken(storedToken);
-            setLoading(false);  // ✅ Token cargado
-        };
-        loadToken();
-    }, []);
-    console.log('PARAMS:', { codigo, modulo, porcentaje, fecha });
-    // ✅ MOSTRAR LOADING MIENTRAS CARGA EL TOKEN
     if (loading) {
         return (
-            <View style={{ flex: 1, backgroundColor: '#0A1628', inset: insets.top }}>
+            <View style={{ flex: 1, backgroundColor: '#0A1628', paddingTop: insets.top }}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color="#C9A227" />
                     <Text style={{ color: '#FFFFFF', marginTop: 16 }}>Cargando certificado...</Text>
@@ -91,7 +86,6 @@ const CertificadoScreen = () => {
                 <View style={{ backgroundColor: '#FFFFFF', borderRadius: 16, overflow: 'hidden', marginBottom: 20, elevation: 4 }}>
                     {!imageError && token ? (
                         <View style={{ width: '100%', height: 220 }}>
-                            {/* Loading overlay */}
                             {imageLoading && (
                                 <View style={{
                                     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,

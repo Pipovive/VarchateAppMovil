@@ -1,6 +1,7 @@
 import Button from '@/components/shared/button';
 import { useModuleViewModel } from '@/src/viewmodels/ModuleViewModel';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
@@ -62,12 +63,14 @@ const HomeScreen = () => {
   // 🔄 Pantalla de carga
   if (loading && modules.length === 0) {
     return (
+       
       <View style={{
         flex: 1,
         backgroundColor: '#F2F2F2',
         justifyContent: 'center',
         alignItems: 'center'
       }}>
+        <StatusBar style="dark"  />
         <ActivityIndicator size="large" color="#0099FF" />
         <Text style={{
           marginTop: 12,
@@ -92,6 +95,7 @@ const HomeScreen = () => {
         alignItems: 'center',
         padding: 24
       }}>
+        <StatusBar style="dark"  />
         <Text style={{ fontSize: 48, marginBottom: 16 }}>😕</Text>
         <Text style={{
           fontSize: 18,
@@ -120,6 +124,7 @@ const HomeScreen = () => {
       paddingHorizontal: 16,
       paddingTop: 40
     }}>
+      <StatusBar style="dark"  />
       <Text className="font-barlow-bold text-center text-2xl mt-4 mb-6">
         COMPETENCIAS
       </Text>

@@ -190,7 +190,6 @@ const handleRegister = async () => {
         <Divider />
 
         <View className='flex-row items-center justify-between'>
-          <Button variant='facebook' className='px-7' disabled={isLoading}>Facebook</Button>
           <Button variant='google' className='px-10' disabled={isLoading}>Gmail</Button>
         </View>
       </View>

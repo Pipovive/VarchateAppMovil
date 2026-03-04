@@ -1,6 +1,7 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -23,7 +24,7 @@ const EditorIndex = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F3F8FF" }}>
-
+      <StatusBar style="light"  />
       {/* HEADER MODERNO */}
       <View style={{
         paddingTop: 60,

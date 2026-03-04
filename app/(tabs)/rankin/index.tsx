@@ -1,6 +1,7 @@
 import { AVATARS } from '@/src/const/avatar';
 import { useRankingViewModel } from '@/src/viewmodels/Rankingviewmodel ';
 import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -52,6 +53,7 @@ export default function RankingScreen() {
 
   return (
     <View className="flex-1 bg-[#EAF4FF]">
+      <StatusBar style="light"  />
       <View style={{ height: insets.top, backgroundColor: '#0099FF' }} />
       <ScrollView showsVerticalScrollIndicator={false}>
 
