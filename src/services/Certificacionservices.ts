@@ -86,33 +86,39 @@ export const obtenerCertificadoPorModuloId = async (moduloId: number) => {
     };
 };
 
-// ✅ NUEVA: Buscar por slug del módulo (más confiable)
-export const obtenerCertificadoPorSlug = async (moduloSlug: string) => {
-    const response = await api.get('/certificaciones');
-    
-    if (!response.data.success) {
-        throw new Error('No se pudieron obtener las certificaciones');
-    }
-    
-    const certificacion = response.data.data.certificaciones.find(
-        (cert: CertificacionData) => cert.modulo.slug === moduloSlug
-    );
-    
-    if (!certificacion) {
-        throw new Error('No tienes un certificado para este módulo');
-    }
-    
-    return {
-        success: true,
-        data: {
-            codigo: certificacion.codigo_certificado,
-            modulo: {
-                titulo: certificacion.modulo.titulo
-            },
-            porcentaje_obtenido: certificacion.resultados.porcentaje_obtenido,
-            fecha_emision: certificacion.resultados.fecha_emision
+// Buscar por slug del módulo (más confiable)
+export const obtenerCertificadoPorSlug = async (moduloSlug: string, intentos = 3, delayMs = 1500) => {
+    for (let i = 0; i < intentos; i++) {
+        const response = await api.get('/certificaciones');
+        
+        if (!response.data.success) {
+            throw new Error('No se pudieron obtener las certificaciones');
         }
-    };
+        
+        const certificacion = response.data.data.certificaciones.find(
+            (cert: CertificacionData) => cert.modulo.slug === moduloSlug
+        );
+        
+        if (certificacion) {
+            return {
+                success: true,
+                data: {
+                    codigo: certificacion.codigo_certificado,
+                    modulo: { titulo: certificacion.modulo.titulo },
+                    porcentaje_obtenido: certificacion.resultados.porcentaje_obtenido,
+                    fecha_emision: certificacion.resultados.fecha_emision
+                }
+            };
+        }
+        
+        // Si no encontró y quedan intentos, esperar y reintentar
+        if (i < intentos - 1) {
+            console.log(`Certificado no encontrado, reintentando en ${delayMs}ms... (${i + 1}/${intentos})`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+    
+    throw new Error('No tienes un certificado para este módulo');
 };
 
 export const getMisCertificaciones = async () => {

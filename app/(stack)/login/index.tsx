@@ -180,15 +180,7 @@ const LoginScreen = () => {
 
         <Divider />
 
-        <View className='flex-row items-center justify-between'>
-          <Button
-            variant='facebook'
-            className='px-7'
-            disabled={loading}
-          >
-            Facebook
-          </Button>
-
+        <View className='w-full'>
           <Button
             variant='google'
             className='px-10'

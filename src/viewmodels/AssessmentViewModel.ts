@@ -202,8 +202,16 @@ export const useAssessmentViewModel = () => {
 
             const response = await guardarRespuesta(moduloId, intentoActual.intento_id, preguntaId, opcionId);
 
+            console.log('💾 Guardando respuesta:', {
+                moduloId,
+                intentoId: intentoActual.intento_id,  // ✅ Verificar este valor
+                preguntaId,
+                opcionId
+            });
+
             if (response.success && response.data) {
                 setRespuestasGuardadas(prev => ({ ...prev, [preguntaId]: opcionId }));
+                console.log('✅ Respuesta guardada:', response);
                 return response.data;
             } else {
                 throw new Error('No se pudo guardar la respuesta');
@@ -244,25 +252,74 @@ export const useAssessmentViewModel = () => {
     };
 
     const finishAssessment = async (moduloId: number) => {
-        if (!intentoActual) throw new Error('No hay intento activo');
-
         try {
+            if (!intentoActual) {
+                throw new Error('No hay intento activo');
+            }
+
             setSubmitting(true);
-            setError(null);
+            console.log('🏁 Finalizando evaluación...', {
+                moduloId,
+                intentoId: intentoActual.intento_id
+            });
 
             const response = await finalizarEvaluacion(moduloId, intentoActual.intento_id);
 
-            if (response.success && response.data) {
-                setResultadoFinal(response.data);
-                return response.data;
-            } else {
-                throw new Error('No se pudo finalizar la evaluación');
+            console.log('✅ Respuesta de finalizar:', response);
+
+            if (!response || !response.success) {
+                throw new Error('Respuesta del servidor inválida');
             }
-        } catch (err: any) {
-            setError(err?.response?.data?.message || 'Error al finalizar evaluación');
-            throw err;
-        } finally {
+
+            if (!response.data) {
+                throw new Error('No se recibieron datos del resultado');
+            }
+
+            const data = response.data;
+            console.log('📊 Datos del resultado:', data);
+
+            // ✅ NUEVO MAPEO - Los datos vienen directamente en data, no anidados
+            const resultado: ResultadoFinal = {
+                // Intento
+                intento_id: data.intento_id || intentoActual.intento_id,
+                tiempo_utilizado_minutos: Math.abs(data.tiempo_utilizado_minutos || 0),
+
+                // Resultados (vienen directos en data)
+                puntuacion_total: data.puntuacion_total || 0,
+                porcentaje_obtenido: data.porcentaje_obtenido || 0,
+                preguntas_correctas: data.preguntas_correctas || 0,
+                preguntas_incorrectas: data.preguntas_incorrectas || 0,
+                preguntas_totales: data.preguntas_totales || 0,
+                aprobado: data.aprobado || false,
+                puntaje_minimo: data.puntaje_minimo || 70,
+
+                // Evaluación (usar datos básicos)
+                evaluacion_titulo: data.evaluacion_titulo || 'Evaluación Final',
+                evaluacion_descripcion: data.evaluacion_descripcion || '',
+
+                // Recomendaciones (viene directamente)
+                mensaje: data.mensaje || '',
+                siguiente_paso: data.siguiente_paso || '',
+
+                // Respuestas detalladas
+                respuestas_detalladas: data.respuestas_detalladas || [],
+
+                // Certificación (opcional)
+                certificacion: data.certificacion || undefined
+            };
+
+            console.log('✅ Resultado mapeado:', resultado);
+
+            setResultadoFinal(resultado);
             setSubmitting(false);
+
+            return resultado;
+
+        } catch (err: any) {
+            console.error('❌ Error al finalizar evaluación:', err);
+            setSubmitting(false);
+            setError(err.message || 'Error al finalizar evaluación');
+            throw err;
         }
     };
 

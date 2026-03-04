@@ -9,10 +9,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // casa lina 192.168.20.27
 // 10.32.22.221
 // 10.32.23.100
+const SERVER_IP = '192.168.20.27'; // ← Solo cambia esto
+const SERVER_PORT = '8000';
+export const BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 
 const api = axios.create({
-  //RECUERDA CAMBIAR LA API EXPOR BASE URL
-  baseURL: 'http://10.32.19.35:8000/api',
+  baseURL: `${BASE_URL}/api`,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -20,7 +22,6 @@ const api = axios.create({
   },
   withCredentials: true
 });
-
 // 🔑 Interceptor de REQUEST - Agregar token automáticamente
 api.interceptors.request.use(
   async (config) => {
@@ -96,24 +97,24 @@ export const getLessonNavigation = async (moduleId, lessonId) => {
   return response.data;
 };
 
-export const BASE_URL = 'http://10.32.19.35/api:8000';
+
 
 export const generarCertificacion = async (moduloId) => {
-    try {
-        const response = await api.post(`/modulos/${moduloId}/certificacion/generar`);
-        return response.data;
-    } catch (err) {
-        // Si ya tiene certificado, retornar como éxito
-        if (err?.response?.status === 400 && err?.response?.data?.data?.codigo_existente) {
-            return err.response.data;
-        }
-        throw err;
+  try {
+    const response = await api.post(`/modulos/${moduloId}/certificacion/generar`);
+    return response.data;
+  } catch (err) {
+    // Si ya tiene certificado, retornar como éxito
+    if (err?.response?.status === 400 && err?.response?.data?.data?.codigo_existente) {
+      return err.response.data;
     }
+    throw err;
+  }
 };
 
 export const getMisCertificaciones = async () => {
-    const response = await api.get('/certificaciones');
-    return response.data;
+  const response = await api.get('/certificaciones');
+  return response.data;
 };
 
 export default api;

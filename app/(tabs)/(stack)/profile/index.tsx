@@ -1,23 +1,33 @@
 import ProgressCard from '@/components/shared/ProgressCard';
+import { AVATARS } from '@/src/const/avatar';
 import { generarCertificacion, obtenerCertificadoPorSlug } from '@/src/services/Certificacionservices'; // ✅ AGREGAR
 import { useModuleViewModel } from '@/src/viewmodels/ModuleViewModel'; // ✅ AGREGAR
 import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { FontAwesome5 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const ProfileScreen = () => {
+
   const router = useRouter();
   const [generatingCertificate, setGeneratingCertificate] = useState<number | null>(null);
-  
+
   const { user, loading: userLoading, error: userError, fetchUser } = useUserViewModel();
-  const { 
-    modulesWithProgress, 
-    loading: modulesLoading, 
-    error: modulesError, 
-    fetchModulesWithProgress 
+  const {
+    modulesWithProgress,
+    loading: modulesLoading,
+    error: modulesError,
+    fetchModulesWithProgress
   } = useModuleViewModel();
+
+  
+  useEffect(() => {
+    AsyncStorage.getItem('token').then(token => {
+        console.log('TOKEN TOKEN COMPLETO:', token);
+    });
+}, []);
 
   useEffect(() => {
     fetchUser();
@@ -26,63 +36,70 @@ const ProfileScreen = () => {
 
   const handleVerCertificado = async (moduloId: number, moduloSlug: string) => {
     try {
-        setGeneratingCertificate(moduloId);
-        
-        console.log('📜 Obteniendo certificado para módulo:', moduloSlug);
-        
+      setGeneratingCertificate(moduloId);
+
+      // Primero intentar obtener certificado existente
+      try {
         const response = await obtenerCertificadoPorSlug(moduloSlug);
-        
         if (response.success && response.data) {
-            console.log('✅ Certificado obtenido:', response.data);
-            
-            router.push({
-                pathname: '/(tabs)/(stack)/certificado',
-                params: {
-                    codigo: response.data.codigo,
-                    modulo: response.data.modulo.titulo,
-                    porcentaje: response.data.porcentaje_obtenido.toString(),
-                    fecha: response.data.fecha_emision,
-                }
-            });
+          router.push({
+            pathname: '/(tabs)/(stack)/certificado',
+            params: {
+              codigo: response.data.codigo,
+              modulo: response.data.modulo.titulo,
+              porcentaje: response.data.porcentaje_obtenido.toString(),
+              fecha: response.data.fecha_emision,
+            }
+          });
+          return;
         }
-        
-    } catch (err: any) {
-        console.error('❌ Error al obtener certificado:', err);
-        
-        if (err.message.includes('No tienes un certificado')) {
-            Alert.alert(
-                'Generar Certificado',
-                '¿Deseas generar tu certificado ahora?',
-                [
-                    { text: 'Cancelar', style: 'cancel' },
-                    {
-                        text: 'Generar',
-                        onPress: async () => {
-                            try {
-                                const genResponse = await generarCertificacion(moduloId);
-                                if (genResponse.success && genResponse.data) {
-                                    router.push({
-                                        pathname: '/(tabs)/(stack)/certificado',
-                                        params: {
-                                            codigo: genResponse.data.codigo_certificado,
-                                            modulo: genResponse.data.modulo,
-                                            porcentaje: genResponse.data.porcentaje.toString(),
-                                            fecha: genResponse.data.fecha_emision,
-                                        }
-                                    });
-                                }
-                            } catch (genErr: any) {
-                                Alert.alert('Error', genErr?.response?.data?.message || 'No se pudo generar el certificado');
-                            }
-                        }
+      } catch {
+        // No existe aún, proceder a generar
+      }
+
+      // Generar certificado
+      Alert.alert(
+        'Generar Certificado',
+        '¿Deseas generar tu certificado? Esto puede tardar unos segundos.',
+        [
+          { text: 'Cancelar', style: 'cancel', onPress: () => setGeneratingCertificate(null) },
+          {
+            text: 'Generar',
+            onPress: async () => {
+              try {
+                const genResponse = await generarCertificacion(moduloId);
+                if (!genResponse.success) throw new Error('No se pudo generar');
+
+                // Esperar 3 segundos a que el backend procese
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                // Reintentar obtener con el slug
+                const certResponse = await obtenerCertificadoPorSlug(moduloSlug);
+
+                if (certResponse.success && certResponse.data) {
+                  router.push({
+                    pathname: '/(tabs)/(stack)/certificado',
+                    params: {
+                      codigo: certResponse.data.codigo,
+                      modulo: certResponse.data.modulo.titulo,
+                      porcentaje: certResponse.data.porcentaje_obtenido.toString(),
+                      fecha: certResponse.data.fecha_emision,
                     }
-                ]
-            );
-        } else {
-            Alert.alert('Error', err.message || 'No se pudo obtener el certificado');
-        }
-    } finally {
-        setGeneratingCertificate(null);
+                  });
+                }
+              } catch (genErr: any) {
+                Alert.alert('Error', genErr?.response?.data?.message || 'No se pudo generar el certificado');
+              } finally {
+                setGeneratingCertificate(null);
+              }
+            }
+          }
+        ]
+      );
+
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'No se pudo obtener el certificado');
+      setGeneratingCertificate(null);
     }
   };
 
@@ -99,7 +116,7 @@ const ProfileScreen = () => {
     return (
       <View className="flex-1 bg-primary-500 rounded-3xl p-4 my-10 border border-secondary-100/10 mx-3 items-center justify-center">
         <Text className="text-red-500">Error: {userError || modulesError}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => {
             fetchUser();
             fetchModulesWithProgress();
@@ -113,7 +130,7 @@ const ProfileScreen = () => {
   }
 
   return (
-    <View className='flex-1 bg-primary-500 rounded-3xl p-4 my-10 border border-secondary-100/10 mx-3'>
+    <View className='flex-1 bg-primary-600 rounded-3xl p-4 my-10 border border-secondary-100/10 mx-3'>
       <View className="flex-row justify-end">
         <TouchableOpacity onPress={() => router.push(`/profile/${user?.id || '1'}`)}>
           <FontAwesome5 name="edit" size={28} color="#000" />
@@ -123,7 +140,7 @@ const ProfileScreen = () => {
       <View className='items-center justify-center'>
         <Image
           style={{ width: 160, resizeMode: 'contain', marginTop: 6, borderRadius: 50, height: 160 }}
-          source={require('../../../../assets/images/gato-perfil.png')}
+          source={AVATARS[user?.avatar_id || 1]}
         />
 
         <Text className='font-barlow-medium text-center mb-3 text-2xl text-secondary'>
@@ -132,8 +149,8 @@ const ProfileScreen = () => {
       </View>
 
       <View className="flex-row justify-between items-center mt-2 mb-2">
-        <Text className='font-barlow-bold text-2xl text-secondary'>Progreso</Text>
-        
+        <Text className='font-barlow-bold text-2xl text-secondary'>PROGRESO</Text>
+
         {modulesWithProgress.length > 0 && (
           <Text className="font-barlow-semibold text-sm text-secondary-100">
             {modulesWithProgress.filter(m => m.progreso === 100).length}/{modulesWithProgress.length} completados
@@ -144,9 +161,9 @@ const ProfileScreen = () => {
       <ScrollView className='flex-1 mt-2' showsVerticalScrollIndicator={false}>
         {modulesWithProgress.length > 0 ? (
           modulesWithProgress.map((module) => (
-            <ProgressCard 
+            <ProgressCard
               key={module.id}
-              title={module.titulo.toUpperCase()} 
+              title={module.titulo.toUpperCase()}
               progress={module.progreso}
               icon={module.icono}
               lecciones_vistas={module.lecciones_vistas}
@@ -154,7 +171,7 @@ const ProfileScreen = () => {
               evaluacion_aprobada={module.evaluacion_aprobada}
               certificado_disponible={module.certificado_disponible}
               moduloId={module.id}
-              moduloSlug={module.slug} 
+              moduloSlug={module.slug}
               generating={generatingCertificate === module.id}
               onVerCertificado={handleVerCertificado}
             />

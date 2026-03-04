@@ -6,8 +6,12 @@ import { router } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import React, { useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CompetitionLayout() {
+    const insets = useSafeAreaInsets();
+  
+
   return (
     <Drawer
       screenOptions={{
@@ -15,6 +19,7 @@ export default function CompetitionLayout() {
         drawerStyle: {
           backgroundColor: "#FFFFFF",
           width: 300,
+          paddingTop: insets.top
         },
       }}
       drawerContent={(props) => <CustomContent {...props} />}
@@ -167,7 +172,7 @@ function CustomContent(props: DrawerContentComponentProps) {
             variant={currentRoute.includes("competition") ? "active" : "no-active"}
             onPress={handleIntroPress}
           >
-            📘 Introducción
+            Introducción
           </CustomDrawerButton>
         </View>
 
@@ -260,7 +265,7 @@ function CustomContent(props: DrawerContentComponentProps) {
               locked={!allLessonsCompleted} 
               completed={allLessonsCompleted}
             >
-              🎯 Evaluación
+            Evaluación
             </CustomDrawerButton>
           </View>
         )}

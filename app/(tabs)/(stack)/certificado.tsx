@@ -13,9 +13,10 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CertificadoScreen = () => {
+    const [imageLoading, setImageLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);  // ✅ AGREGAR
     const router = useRouter();
@@ -25,7 +26,7 @@ const CertificadoScreen = () => {
         porcentaje: string;
         fecha: string;
     }>();
-
+    const insets = useSafeAreaInsets();
     const [imageError, setImageError] = useState(false);
     const urlImagen = `${BASE_URL}/api/certificaciones/${codigo}/ver`;
     const urlDescargar = `${BASE_URL}/api/certificaciones/${codigo}/descargar`;
@@ -56,7 +57,7 @@ const CertificadoScreen = () => {
     // ✅ MOSTRAR LOADING MIENTRAS CARGA EL TOKEN
     if (loading) {
         return (
-            <View style={{ flex: 1, backgroundColor: '#0A1628' }}>
+            <View style={{ flex: 1, backgroundColor: '#0A1628', inset: insets.top }}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color="#C9A227" />
                     <Text style={{ color: '#FFFFFF', marginTop: 16 }}>Cargando certificado...</Text>
@@ -66,7 +67,7 @@ const CertificadoScreen = () => {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0A1628' }}>
+        <View style={{ flex: 1, backgroundColor: '#0A1628', paddingTop: insets.top }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16 }}>
                 <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 16 }}>
                     <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
@@ -88,20 +89,40 @@ const CertificadoScreen = () => {
                 </View>
 
                 <View style={{ backgroundColor: '#FFFFFF', borderRadius: 16, overflow: 'hidden', marginBottom: 20, elevation: 4 }}>
-                    {!imageError && token ? (  // ✅ SOLO MOSTRAR SI HAY TOKEN
-                        <Image
-                            source={{
-                                uri: urlImagen,
-                                headers: { Authorization: `Bearer ${token}` }
-                            }}
-                            style={{ width: '100%', height: 220 }}
-                            resizeMode="contain"
-                            onError={(e) => {
-                                console.error('❌ Error cargando imagen:', e.nativeEvent.error);
-                                setImageError(true);
-                            }}
-                            onLoad={() => console.log('✅ Imagen cargada correctamente')}
-                        />
+                    {!imageError && token ? (
+                        <View style={{ width: '100%', height: 220 }}>
+                            {/* Loading overlay */}
+                            {imageLoading && (
+                                <View style={{
+                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                    alignItems: 'center', justifyContent: 'center',
+                                    backgroundColor: '#F9FAFB', zIndex: 1
+                                }}>
+                                    <ActivityIndicator size="large" color="#C9A227" />
+                                    <Text style={{ color: '#6B7280', marginTop: 8, fontSize: 13 }}>
+                                        Cargando certificado...
+                                    </Text>
+                                </View>
+                            )}
+                            <Image
+                                source={{
+                                    uri: urlImagen,
+                                    headers: { Authorization: `Bearer ${token}` }
+                                }}
+                                style={{ width: '100%', height: 220 }}
+                                resizeMode="contain"
+                                onLoadStart={() => setImageLoading(true)}
+                                onLoad={() => {
+                                    console.log('✅ Imagen cargada correctamente');
+                                    setImageLoading(false);
+                                }}
+                                onError={(e) => {
+                                    console.error('❌ Error cargando imagen:', e.nativeEvent.error);
+                                    setImageLoading(false);
+                                    setImageError(true);
+                                }}
+                            />
+                        </View>
                     ) : (
                         <View style={{ height: 220, alignItems: 'center', justifyContent: 'center' }}>
                             <Text style={{ fontSize: 40 }}>📜</Text>

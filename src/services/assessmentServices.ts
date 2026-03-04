@@ -41,11 +41,10 @@ export interface RespuestaEvaluacion {
 }
 
 export interface ResultadoFinal {
+    // del intento
     intento_id: number;
-    evaluacion_id: number;
-    fecha_fin: string;
-    tiempo_utilizado_segundos: number;
     tiempo_utilizado_minutos: number;
+    // de resultados
     puntuacion_total: number;
     porcentaje_obtenido: number;
     preguntas_correctas: number;
@@ -53,12 +52,20 @@ export interface ResultadoFinal {
     preguntas_totales: number;
     aprobado: boolean;
     puntaje_minimo: number;
+    // de evaluacion
+    evaluacion_titulo: string;
+    evaluacion_descripcion: string;
+    // de recomendaciones
     mensaje: string;
+    siguiente_paso: string;
+    // de certificacion (si existe)
     certificacion?: {
         disponible: boolean;
         modulo_id: number;
         mensaje: string;
     };
+    // detalle completo
+    respuestas_detalladas: DetalleResultado['respuestas_detalladas'];
 }
 
 export interface DetalleResultado {
@@ -171,8 +178,28 @@ export const guardarRespuestaArrastrar = async (
  * POST /modulos/{moduloId}/evaluacion/{intentoId}/finalizar
  */
 export const finalizarEvaluacion = async (moduloId: number, intentoId: number) => {
-    const response = await api.post(`/modulos/${moduloId}/evaluacion/${intentoId}/finalizar`);
-    return response.data;
+    console.log('📤 Service finalizarEvaluacion:', {
+        url: `/modulos/${moduloId}/evaluacion/${intentoId}/finalizar`,
+        moduloId,
+        intentoId
+    });
+    
+    try {
+        const response = await api.post(`/modulos/${moduloId}/evaluacion/${intentoId}/finalizar`);
+        
+        console.log('✅ Response completa de finalizar:', response.data);
+        
+        // ✅ RETORNAR TODA LA DATA
+        return response.data;
+        
+    } catch (error: any) {
+        console.error('❌ Error en finalizarEvaluacion:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+        });
+        throw error;
+    }
 };
 
 /**

@@ -6,9 +6,12 @@ import { useCurrentModule } from "@/src/context/ModuleContext";
 import { getModuleBySlug } from "@/src/services/modulesServices";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import RenderHTML from 'react-native-render-html';
+
 
 export default function CompetitionScreen() {
+  const { width } = useWindowDimensions();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
 
@@ -53,31 +56,83 @@ export default function CompetitionScreen() {
     );
   }
 
+  console.log('🔍 Primeros 100 caracteres:', selectedModule.descripcion_larga.substring(0, 100));
+
   return (
     <View style={{ flex: 1, backgroundColor: '#EAF4FF' }}>
+      <TopProgressHeader
+        title={selectedModule.titulo}
+        activeSlug={slug as string}
+      />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1, paddingTop: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <TopProgressHeader
-          title={selectedModule.titulo}
-          activeSlug={slug as string}
-        />
+
 
         <WhiteScreenContainer>
           <ModuleHeader />
 
-          <Text style={{
-            fontSize: 16,
-            lineHeight: 24,
-            color: '#374151',
-            fontFamily: 'Barlow-Regular',
-            marginTop: 16
-          }}>
-            {selectedModule.descripcion_larga}
-          </Text>
+          <RenderHTML
+            contentWidth={width}
+            source={{
+              html: selectedModule.descripcion_larga
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+            }}
+            tagsStyles={{
+              body: {
+                fontSize: 16,
+                color: '#374151',
+              },
+              p: {
+                marginBottom: 12,
+                marginTop: 0,
+                lineHeight: 24
+              },
+              h2: {
+                fontSize: 20,
+                fontWeight: 'bold',
+                marginTop: 16,
+                marginBottom: 8,
+                color: '#1F2937'
+              },
+              h3: {
+                fontSize: 18,
+                fontWeight: 'bold',
+                marginTop: 12,
+                marginBottom: 6,
+                color: '#1F2937'
+              },
+              ul: {
+                marginTop: 8,
+                marginBottom: 12,
+                paddingLeft: 20
+              },
+              li: {
+                marginBottom: 4,
+                lineHeight: 20
+              },
+              pre: {
+                backgroundColor: '#F3F4F6',
+                padding: 12,
+                borderRadius: 8,
+                marginTop: 8,
+                marginBottom: 12,
 
+              },
+              code: {
+                fontFamily: 'monospace',
+                fontSize: 14,
+                color: '#1F2937'
+              }
+            }}
+            systemFonts={['Barlow-Regular', 'Barlow-Bold']}
+            defaultTextProps={{ allowFontScaling: false }} // ← Agrega esto
+            enableExperimentalMarginCollapsing // ← Y esto
+          />
           <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#1F2937', marginTop: 24, marginBottom: 16 }}>
             Contenido ({lessons.length} lecciones)
           </Text>

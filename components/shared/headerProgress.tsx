@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 type Props = {
@@ -38,7 +39,7 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
   };
 
   const navigation = useNavigation<DrawerNavigationProp<any>>();
-
+  const insets = useSafeAreaInsets();
   const handleMenuPress = () => {
     console.log('📱 Abriendo drawer...');
     navigation.openDrawer();
@@ -53,7 +54,7 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
   return (
     <>
       {/* PROGRESS BAR */}
-      <View className="w-full bg-primary-100 px-4 pt-6 pb-2">
+      <View className="w-full bg-primary-100 px-4 pb-2" style={{ paddingTop: insets.top + 8 }}>
         <View className="flex-row items-center mb-3">
           {/* REGRESAR */}
           <TouchableOpacity

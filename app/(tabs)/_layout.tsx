@@ -4,11 +4,13 @@ import { Tabs } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Image } from 'react-native';
 
+
 const TabsLayout = () => {
   const { user, loading: userLoading, error: userError, fetchUser } = useUserViewModel();
-  useEffect (() => {
+  useEffect(() => {
     fetchUser()
   }, [])
+ 
   return (
     <Tabs
       screenOptions={{
@@ -19,6 +21,7 @@ const TabsLayout = () => {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
+          paddingBottom: 0,
         },
         tabBarLabelStyle: {
           color: '#FFFFFF',
@@ -66,6 +69,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="chatbot/index"
         options={{
+          href: null,
           title: 'Pregúntar',
           tabBarIcon: ({ focused }) => (
             <Image
@@ -80,13 +84,13 @@ const TabsLayout = () => {
         }}
       />
 
-            <Tabs.Screen
+      <Tabs.Screen
         name="rankin/index"
         options={{
           title: 'rankin',
           tabBarIcon: ({ focused }) => (
             <Image
-              source={require('../../assets/images/iaW.png')}
+              source={require('../../assets/images/rankin.png')}
               style={{
                 width: focused ? 28 : 24,
                 height: focused ? 28 : 24,
@@ -117,7 +121,7 @@ const TabsLayout = () => {
       />
 
 
-        
+
 
       {/* Oculta el drawer de los tabs */}
       <Tabs.Screen

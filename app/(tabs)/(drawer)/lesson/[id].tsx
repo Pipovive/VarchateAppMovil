@@ -7,6 +7,8 @@ import { getModuleBySlug } from "@/src/services/modulesServices";
 import { useExerciseViewModel } from '@/src/viewmodels/ExcerciseViewModel';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useWindowDimensions } from 'react-native';
+import RenderHTML from 'react-native-render-html';
 
 import {
     ActivityIndicator,
@@ -18,7 +20,7 @@ import {
 
 const LessonDetailScreen = () => {
     const router = useRouter();
-
+    const { width } = useWindowDimensions();
     const { id, moduleSlug } = useLocalSearchParams<{
         id: string;
         moduleSlug?: string;
@@ -244,14 +246,26 @@ const LessonDetailScreen = () => {
                     </Text>
 
                     <View style={{ marginTop: 16 }}>
-                        <Text style={{
-                            fontSize: 16,
-                            lineHeight: 28,
-                            color: '#374151',
-                            fontFamily: 'Barlow-Regular'
-                        }}>
-                            {selectedLesson.contenido}
-                        </Text>
+                        <RenderHTML
+                            contentWidth={width}
+                            source={{
+                                html: selectedLesson.contenido
+                                    .replace(/&lt;/g, '<')
+                                    .replace(/&gt;/g, '>')
+                                    .replace(/&amp;/g, '&')
+                                    .replace(/&quot;/g, '"')
+                            }}
+                            tagsStyles={{
+                                p: { fontSize: 16, lineHeight: 24, color: '#374151', marginBottom: 12 },
+                                h2: { fontSize: 20, fontWeight: 'bold', marginTop: 16, marginBottom: 8, color: '#1F2937' },
+                                h3: { fontSize: 18, fontWeight: 'bold', marginTop: 12, marginBottom: 6, color: '#1F2937' },
+                                ul: { marginTop: 8, marginBottom: 12, paddingLeft: 20 },
+                                li: { marginBottom: 4, lineHeight: 20 },
+                                pre: { backgroundColor: '#F3F4F6', padding: 12, borderRadius: 8, marginBottom: 12 },
+                                code: { fontFamily: 'monospace', fontSize: 14, color: '#1F2937' },
+                            }}
+                            defaultTextProps={{ allowFontScaling: false }}
+                        />
                     </View>
 
                     {/* Badges informativos */}

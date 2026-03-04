@@ -6,6 +6,7 @@ import { LessonProvider } from '@/src/context/LessonContext';
 import { ModuleProvider } from '@/src/context/ModuleContext';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar'; // ← AGREGA
 import React, { useEffect } from 'react';
 import "./global.css";
 
@@ -28,11 +29,13 @@ const RootLayout = () => {
   return (
     <ModuleProvider>
       <LessonProvider>
-        <Stack screenOptions={{ headerShown: false }}>
+        <StatusBar style="light" backgroundColor="#0099FF" />
+        <Stack screenOptions={{ headerShown: false,  contentStyle: { backgroundColor: '#0099FF' } }}>
           <Stack.Screen name="(tabs)" />
         </Stack>
       </LessonProvider>
     </ModuleProvider>
+      
   );
 }
 
