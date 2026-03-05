@@ -7,7 +7,7 @@ import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import axios from 'axios';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Text, View } from 'react-native';
 
 interface LaravelValidationError {
   message: string
@@ -46,6 +46,7 @@ const LoginScreen = () => {
   }
 
   const handleGoogleLogin = async () => {
+    setIsLoading(true);
     try {
       const userInfo = await signInWithGoogle();
       if (userInfo.type === 'success') {
@@ -61,6 +62,8 @@ const LoginScreen = () => {
       }
     } catch (error: any) {
       Alert.alert('Error', error.message);
+    } finally {
+      setIsLoading(false);  // ← desactiva loading siempre
     }
   };
   return (
@@ -129,6 +132,7 @@ const LoginScreen = () => {
           >
             Gmail
           </Button>
+          {isLoading && <ActivityIndicator color="#0099FF" size="small" />}
         </View>
       </View>
 

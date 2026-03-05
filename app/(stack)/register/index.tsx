@@ -23,26 +23,29 @@ const RegisterScreen = () => {
   const { loginWithGoogleToken } = useUserViewModel(); // ← agrega esto
   // const { request, response, promptAsync } = useGoogleSignIn(); // ← úsalo
 
-  
-  const handleGoogleLogin = async () => {
-  try {
-    const userInfo = await signInWithGoogle();
-    if (userInfo.type === 'success') {
-      // ← obtén el accessToken
-      const { accessToken } = await GoogleSignin.getTokens();
-      console.log('🔑🔑🔑 Access Token:', accessToken);
-      if (!accessToken) {
-        Alert.alert('Error', 'No se pudo obtener el token');
-        return;
-      }
 
-      await loginWithGoogleToken(accessToken); // ← envía accessToken
-      router.replace('/(tabs)/home');
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const userInfo = await signInWithGoogle();
+      if (userInfo.type === 'success') {
+        // ← obtén el accessToken
+        const { accessToken } = await GoogleSignin.getTokens();
+        console.log('🔑🔑🔑 Access Token:', accessToken);
+        if (!accessToken) {
+          Alert.alert('Error', 'No se pudo obtener el token');
+          return;
+        }
+
+        await loginWithGoogleToken(accessToken); // ← envía accessToken
+        router.replace('/(tabs)/home');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsLoading(false);  // ← desactiva loading siempre
     }
-  } catch (error: any) {
-    Alert.alert('Error', error.message);
-  }
-};
+  };
 
   const handleRegister = async () => {
     if (!email || !nombre || !password || !validPassword || !checked) {
@@ -236,6 +239,7 @@ const RegisterScreen = () => {
         >
           Gmail
         </Button>
+        {isLoading && <ActivityIndicator color="#0099FF" size="small" />}
       </View>
 
       <View className='flex-row items-center mt-4 justify-center'>

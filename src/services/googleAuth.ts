@@ -8,6 +8,7 @@ GoogleSignin.configure({
 export const signInWithGoogle = async () => {
   try {
     await GoogleSignin.hasPlayServices();
+    await GoogleSignin.signOut();
     const userInfo = await GoogleSignin.signIn();
     return userInfo;
   } catch (error: any) {

@@ -4,10 +4,10 @@ import { generarCertificacion, obtenerCertificadoPorSlug } from '@/src/services/
 import { useModuleViewModel } from '@/src/viewmodels/ModuleViewModel'; // ✅ AGREGAR
 import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { FontAwesome5 } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+
 
 const ProfileScreen = () => {
 
@@ -22,17 +22,14 @@ const ProfileScreen = () => {
     fetchModulesWithProgress
   } = useModuleViewModel();
 
-  
-  useEffect(() => {
-    AsyncStorage.getItem('token').then(token => {
-        console.log('TOKEN TOKEN COMPLETO:', token);
-    });
-}, []);
 
-  useEffect(() => {
-    fetchUser();
-    fetchModulesWithProgress();
-  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUser();
+      fetchModulesWithProgress();
+    }, [])
+  );
 
   const handleVerCertificado = async (moduloId: number, moduloSlug: string) => {
     try {
