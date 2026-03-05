@@ -1,12 +1,15 @@
 import Button from '@/components/shared/button';
 import Divider from '@/components/shared/divider';
 import Input from '@/components/shared/input';
+import { signInWithGoogle } from '@/src/services/googleAuth';
 // import { useGoogleSignIn } from '@/src/services/googleAuth'; // ← importa el hook
 import { useRegisterViewModel } from '@/src/viewmodels/RegisterViewModel';
+import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState('');
@@ -17,7 +20,29 @@ const RegisterScreen = () => {
   const [checked, setChecked] = useState(false)
   const [isLoading, setIsLoading] = useState(false) // ← Estado de carga
   const { registerUser } = useRegisterViewModel()
+  const { loginWithGoogleToken } = useUserViewModel(); // ← agrega esto
   // const { request, response, promptAsync } = useGoogleSignIn(); // ← úsalo
+
+  
+  const handleGoogleLogin = async () => {
+  try {
+    const userInfo = await signInWithGoogle();
+    if (userInfo.type === 'success') {
+      // ← obtén el accessToken
+      const { accessToken } = await GoogleSignin.getTokens();
+      console.log('🔑🔑🔑 Access Token:', accessToken);
+      if (!accessToken) {
+        Alert.alert('Error', 'No se pudo obtener el token');
+        return;
+      }
+
+      await loginWithGoogleToken(accessToken); // ← envía accessToken
+      router.replace('/(tabs)/home');
+    }
+  } catch (error: any) {
+    Alert.alert('Error', error.message);
+  }
+};
 
   const handleRegister = async () => {
     if (!email || !nombre || !password || !validPassword || !checked) {
@@ -110,7 +135,6 @@ const RegisterScreen = () => {
       alert('Ocurrió un error inesperado')
     }
   }
-  // React.useEffect(() => {
   //   if (!googleIniciado) return; // ← ignora si no iniciaste el login
 
   //   console.log('🔄 Response:', response);
@@ -208,9 +232,7 @@ const RegisterScreen = () => {
           variant='google'
           className='px-10'
           disabled={isLoading}
-          onPress={() => {
-            setGoogleIniciado(true);
-          }} // ← así
+          onPress={handleGoogleLogin}
         >
           Gmail
         </Button>

@@ -1,5 +1,5 @@
-const { default: axios } = require("axios")
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 
 //NOTA arracnar php artisan asi: php artisan serve --host=0.0.0.0 --port=8000

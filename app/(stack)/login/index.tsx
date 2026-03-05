@@ -1,15 +1,13 @@
-import Button from '@/components/shared/button'
-import Divider from '@/components/shared/divider'
-import Input from '@/components/shared/input'
-// import { useGoogleSignIn } from '@/src/services/googleAuth'
-import { useLoginViewModel } from '@/src/viewmodels/LoginViewModel'
-import axios from 'axios'
-import { router } from 'expo-router'
-import React, { useState } from 'react'
-import { Alert, Image, Text, View } from 'react-native'
-
-
-
+import Button from '@/components/shared/button';
+import Divider from '@/components/shared/divider';
+import Input from '@/components/shared/input';
+import { signInWithGoogle } from '@/src/services/googleAuth';
+import { useLoginViewModel } from '@/src/viewmodels/LoginViewModel';
+import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
+import axios from 'axios';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Image, Text, View } from 'react-native';
 
 interface LaravelValidationError {
   message: string
@@ -17,77 +15,22 @@ interface LaravelValidationError {
 }
 
 const LoginScreen = () => {
-  const [googleStarted, setGoogleStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { loginUser, loginWithGoogleToken, loading } = useLoginViewModel()
-  // const { request, response, promptAsync } = useGoogleSignIn()
-  const [googleIniciado, setGoogleIniciado] = useState(false);
-
-  // Manejar respuesta de Google
-  // React.useEffect(() => {
-  //   if (!googleIniciado) return; // ← ignora si no iniciaste el login
-
-  //   console.log('🔄 Response:', response);
-  //   if (response?.type === 'success') {
-  //     const token = response.authentication?.accessToken;
-  //     console.log('✅ Token:', token);
-  //   }
-  //   if (response?.type === 'dismiss') {
-  //     console.log('⚠️ Usuario cerró el login');
-  //   }
-  // }, [response]);
-
-
-
-  const handleGoogleResponse = async (idToken: string) => {
-    try {
-      console.warn('🔵 ENVIANDO TOKEN');
-
-      const data = await loginWithGoogleToken(idToken);
-
-      console.warn('✅ RESPUESTA OK:', JSON.stringify(data).substring(0, 100));
-
-      console.warn('🚀 NAVEGANDO...');
-      router.replace('/(tabs)/home');
-
-    } catch (error: any) {
-      console.warn('❌ ERROR:', error.message);
-      Alert.alert('Error', error.message);
-    }
-  };
-
-  // React.useEffect(() => {
-  //   if (response?.type === 'success') {
-  //     const token = response.authentication?.accessToken;
-  //     console.log('✅ Access token:', token);
-  //     // enviar token a tu backend
-  //   }
-  // }, [response]);
-
-  // React.useEffect(() => {
-  //   if (request) {
-  //     console.log('🔍 Request completo:', JSON.stringify(request, null, 2));
-  //   }
-  // }, [request]);
+  const { loginUser, loading } = useLoginViewModel()
+  const { loginWithGoogleToken } = useUserViewModel();
 
   const handleLogin = async () => {
     if (!email || !password) {
       alert('Completa todos los campos')
       return
     }
-
     try {
       const data = await loginUser(email, password)
-
-      if (!data?.access_token) {
-        throw new Error('Token no recibido')
-      }
-
+      if (!data?.access_token) throw new Error('Token no recibido')
       Alert.alert('Éxito', 'Has iniciado sesión correctamente')
       router.replace('/(tabs)/home')
-
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 422) {
@@ -102,22 +45,24 @@ const LoginScreen = () => {
     }
   }
 
-  // const handleGoogleLogin = async () => {
-  //   try {
-  //     if (!request) {
-  //       Alert.alert('Error', 'Google Sign-In no está listo');
-  //       return;
-  //     }
+  const handleGoogleLogin = async () => {
+    try {
+      const userInfo = await signInWithGoogle();
+      if (userInfo.type === 'success') {
+        const idToken = userInfo.data.idToken;
 
-  //     setGoogleStarted(true);
-  //     await promptAsync();
+        if (!idToken) {
+          Alert.alert('Error', 'No se pudo obtener el token de Google');
+          return;
+        }
 
-  //   } catch (error: any) {
-  //     setGoogleStarted(false);
-  //     Alert.alert('Error', error.message || 'Error al abrir Google Sign-In');
-  //   }
-  // };
-
+        await loginWithGoogleToken(idToken);
+        router.replace('/(tabs)/home');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
+  };
   return (
     <>
       <View className='mx-3 justify-center items-center' pointerEvents="none">
@@ -132,7 +77,6 @@ const LoginScreen = () => {
       </View>
 
       <View className='bg-white rounded-3xl p-4 mt-[-100] border border-secondary-100/10 mx-2'>
-
         <Text className='font-barlow-bold text-center mb-3 text-2xl'>Iniciar Sesión</Text>
 
         <Input
@@ -168,7 +112,7 @@ const LoginScreen = () => {
         <Button
           variant='contained'
           className='mt-3'
-          onPress={handleLogin}
+          onPress={handleLogin}  // ← corregido
           disabled={loading}
         >
           {loading ? 'Cargando...' : 'Entrar'}
@@ -181,14 +125,11 @@ const LoginScreen = () => {
             variant='google'
             className='px-10'
             disabled={isLoading}
-            onPress={() => {
-              setGoogleIniciado(true);
-             
-            }}>
+            onPress={handleGoogleLogin}  // ← corregido
+          >
             Gmail
           </Button>
         </View>
-
       </View>
 
       <View className='flex-row items-center mt-3 justify-center'>
