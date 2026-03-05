@@ -1,6 +1,6 @@
+import { useTheme } from '@/src/context/ThemeContext';
 import React from 'react';
 import { Image, Pressable, PressableProps, Text, View } from 'react-native';
-
 
 interface props extends PressableProps {
     children?: string;
@@ -12,12 +12,13 @@ interface props extends PressableProps {
     textPos?: 'left' | 'right' | 'center';
     value?: boolean;
     textColor?: 'normal' | 'link';
-
+    style?: object;
 
 
 }
 
-const Button = ({ children, color = 'primary', variant = 'contained', className, onPress, font = 'bold', source, textPos = 'center', value, textColor = 'link' }: props) => {
+const Button = ({ children, color = 'primary', variant = 'contained', className, onPress, font = 'bold', source, textPos = 'center', value, textColor = 'link', style }: props) => {
+    const { isDark } = useTheme();
     const txtPos = {
         left: 'text-left',
         right: 'text-right',
@@ -62,16 +63,33 @@ const Button = ({ children, color = 'primary', variant = 'contained', className,
         )
     } else if (variant === 'google') {
         return (
-            <Pressable className={`p-3 rounded-md border-tertiary border-2 active:opacity-90 w-full ${className}`}
+            <Pressable
+                style={{
+                    padding: 12,
+                    borderRadius: 8,
+                    borderWidth: 2,
+                    borderColor: isDark ? '#E67F76' : '#FF6B6B',
+                    backgroundColor: isDark ? '#1B1D23' : 'transparent',
+                    width: '100%',
+                    opacity: 1,
+                }}
+                className={`active:opacity-90 ${className}`}
                 onPress={onPress}
             >
-                <Text className={`${txtPos} color-tertiary ${btnFont}`}>{children}</Text>
+                <Text style={{
+                    textAlign: 'center',
+                    color: isDark ? '#FFFFFF' : '#FF6B6B',
+                    fontFamily: 'Barlow-Bold'
+                }}>
+                    {children}
+                </Text>
             </Pressable>
         )
     } else if (variant === 'card') {
         return (
             <Pressable className={`my-4 p-3 active:opacity-90 ${className} `}
                 onPress={onPress}
+                style={style}
             >
                 <Image
                     source={source}
@@ -87,14 +105,26 @@ const Button = ({ children, color = 'primary', variant = 'contained', className,
         )
     } else if (variant === 'toggle') {
         return (
-            <Pressable className={`h-10 mr-2 w-20 flex-row rounded-full p-1 ${value ? 'bg-primary-100' : 'bg-secondary-100'} `}
-                onPress={onPress}
+            <Pressable
+                style={{
+                    height: 40,
+                    width: 80,
+                    borderRadius: 20,
+                    padding: 4,
+                    backgroundColor: value ? '#0099FF' : '#9CA3AF',
+                }}
+                onPress={() => {
+                    console.log('🔘 Toggle presionado, value actual:', value);
+                    // onPress?.(); // ← llama onPress si existe
+                }}
             >
-
-                <View className={`w-8 h-8 rounded-full bg-quaternary ${value ? 'ml-10' : 'ml-0'}`}></View>
-
-                {/* <Text className='text-sm'>{value ? 'Light' : 'Dark'}</Text> */}
-
+                <View style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: '#FFFFFF',
+                    marginLeft: value ? 36 : 0,
+                }} />
             </Pressable>
         )
     }

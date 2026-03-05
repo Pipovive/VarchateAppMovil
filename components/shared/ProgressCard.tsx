@@ -1,3 +1,4 @@
+import { useTheme } from '@/src/context/ThemeContext';
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
@@ -10,69 +11,71 @@ interface ProgressCardProps {
     evaluacion_aprobada?: boolean;
     certificado_disponible?: boolean;
     moduloId?: number;
-    moduloSlug?: string;  // ✅ AGREGAR
+    moduloSlug?: string;
     generating?: boolean;
-    onVerCertificado?: (moduloId: number, moduloSlug: string) => void;  // ✅ CAMBIAR
+    onVerCertificado?: (moduloId: number, moduloSlug: string) => void;
 }
 
 const ProgressCard = ({
-    title,
-    progress,
-    icon,
-    lecciones_vistas,
-    total_lecciones,
-    evaluacion_aprobada,
-    certificado_disponible,
-    moduloId,
-    moduloSlug,  // ✅ AGREGAR
-    generating,
-    onVerCertificado,
+    title, progress, icon, lecciones_vistas, total_lecciones,
+    evaluacion_aprobada, certificado_disponible, moduloId, moduloSlug,
+    generating, onVerCertificado,
 }: ProgressCardProps) => {
+    const { isDark } = useTheme();
+
+    const colors = {
+        card: isDark ? '#454958' : '#FFFFFF',
+        text: isDark ? '#FFFFFF' : '#111827',
+        subtext: isDark ? '#D1D5DB' : '#6B7280',
+        border: isDark ? '#555555' : '#E5E7EB',
+        progressBg: isDark ? '#555555' : '#E5E7EB',
+        botton: isDark ? '#616461' : '#AFCBFF'
+    };
+
     return (
-        <View className="bg-quaternary rounded-xl p-4 mb-3 border border-secondary-100/20">
-            <View className="flex-row items-center justify-between mb-2">
-                <View className="flex-row items-center flex-1">
-                    <Text className="font-barlow-bold text-secondary flex-1 text-2xl" numberOfLines={1}>
-                        {title}
-                    </Text>
-                </View>
-                <Text className="font-barlow-bold text-primary-200 ml-2">{progress}%</Text>
+        <View style={{
+            backgroundColor: colors.card,
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+        }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <Text style={{ fontFamily: 'Barlow-Bold', color: colors.text, fontSize: 22, flex: 1 }} numberOfLines={1}>
+                    {title}
+                </Text>
+                <Text style={{ fontFamily: 'Barlow-Bold', color: '#0099FF', marginLeft: 8 }}>{progress}%</Text>
             </View>
 
             {/* Barra de progreso */}
-            <View className="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
-                <View
-                    className="h-full bg-primary-200 rounded-full"
-                    style={{ width: `${progress}%` }}
-                />
+            <View style={{ width: '100%', height: 34, backgroundColor: colors.progressBg, borderRadius: 12, overflow: 'hidden' }}>
+                <View style={{ height: '100%', width: `${progress}%`, backgroundColor: '#0099FF', borderRadius: 12 }} />
             </View>
 
             {/* Info adicional */}
-            <View className="flex-row items-center justify-between mt-2">
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
                 {lecciones_vistas !== null && total_lecciones !== null && (
-                    <Text className="text-xs text-secondary-100 font-barlow-medium">
+                    <Text style={{ fontSize: 12, color: colors.subtext, fontFamily: 'Barlow-Medium' }}>
                         {lecciones_vistas}/{total_lecciones} lecciones
                     </Text>
                 )}
-                <View className="flex-row gap-2">
-                    {evaluacion_aprobada && (
-                        <Text className="text-xs">✅ Evaluado</Text>
-                    )}
-                </View>
+                {evaluacion_aprobada && (
+                    <Text style={{ fontSize: 12 }}>✅ Evaluado</Text>
+                )}
             </View>
 
             {/* Botón certificado */}
-            {certificado_disponible && moduloId && moduloSlug && onVerCertificado && (  // ✅ AGREGAR moduloSlug &&
+            {certificado_disponible && moduloId && moduloSlug && onVerCertificado && (
                 <TouchableOpacity
-                    onPress={() => onVerCertificado(moduloId, moduloSlug)}  // ✅ PASAR 2 PARÁMETROS
+                    onPress={() => onVerCertificado(moduloId, moduloSlug)}
                     disabled={generating}
-                    className="mt-3 bg-yellow-500 rounded-lg py-2 px-4 flex-row items-center justify-center"
-                    style={{ opacity: generating ? 0.7 : 1 }}
+                    style={{ marginTop: 12, backgroundColor: colors.botton, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 16, alignItems: 'center', opacity: generating ? 0.7 : 1 }}
                 >
                     {generating ? (
                         <ActivityIndicator size="small" color="#fff" />
                     ) : (
-                        <Text className="text-white font-barlow-bold text-xl">
+                        <Text style={{ color: '#FFFFFF', fontFamily: 'Barlow-Bold', fontSize: 16 }}>
                             Ver mi Certificado
                         </Text>
                     )}

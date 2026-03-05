@@ -1,57 +1,57 @@
-import { Stack } from 'expo-router'
-import React from 'react'
+import { useTheme } from '@/src/context/ThemeContext';
+import { Stack } from 'expo-router';
+import React from 'react';
 
 const StackLayout = () => {
-  return (
-    <Stack
-        screenOptions={{
-            headerShown: false,
-            contentStyle: {
-                backgroundColor: 'white'
+    const { isDark } = useTheme();
+    return (
+        <Stack
+            screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: isDark ? '#454958' : '#0099FF' } 
             }
-        }        
-        }>
-            
-        <Stack.Screen
-        name='carrusel/index'
-        options={{
-            title: 'Carrusel'
+            }>
 
-        }}/>
-        
-        <Stack.Screen
-        name='register/index'
-        options={{
-            title: 'Register'
+            <Stack.Screen
+                name='carrusel/index'
+                options={{
+                    title: 'Carrusel'
 
-        }}/>
-        
-        <Stack.Screen
-        name='terms/index'
-        options={{
-            title: 'Terms and Conditions'
+                }} />
 
-        }}/>
+            <Stack.Screen
+                name='register/index'
+                options={{
+                    title: 'Register'
 
-        <Stack.Screen
-        name='login/index'
-        options={{
-            title: 'Login'
+                }} />
 
-        }}/>
+            <Stack.Screen
+                name='terms/index'
+                options={{
+                    title: 'Terms and Conditions'
 
-        <Stack.Screen
-        name='forgotPassword/index'
-        options={{
-            title: 'Forgot Password'
+                }} />
 
-        }}/>
-        
+            <Stack.Screen
+                name='login/index'
+                options={{
+                    title: 'Login'
+
+                }} />
+
+            <Stack.Screen
+                name='forgotPassword/index'
+                options={{
+                    title: 'Forgot Password'
+
+                }} />
 
 
 
-    </Stack>
-  )
+
+        </Stack>
+    )
 }
 
 export default StackLayout

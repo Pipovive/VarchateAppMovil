@@ -4,11 +4,13 @@ WebBrowser.maybeCompleteAuthSession();
 
 import { LessonProvider } from '@/src/context/LessonContext';
 import { ModuleProvider } from '@/src/context/ModuleContext';
+import { ThemeProvider } from '@/src/context/ThemeContext';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar'; // ← AGREGA
 import React, { useEffect } from 'react';
 import "./global.css";
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,15 +29,17 @@ const RootLayout = () => {
   if (!fontsLoaded && !error) return null;
 
   return (
-    <ModuleProvider>
-      <LessonProvider>
-        <StatusBar style="light" backgroundColor="#0099FF" />
-        <Stack screenOptions={{ headerShown: false,  contentStyle: { backgroundColor: '#0099FF' } }}>
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-      </LessonProvider>
-    </ModuleProvider>
-      
+    <ThemeProvider>
+      <ModuleProvider>
+        <LessonProvider>
+          <StatusBar style="light" backgroundColor="#0099FF" />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#0099FF' } }}>
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+        </LessonProvider>
+      </ModuleProvider>
+    </ThemeProvider>
+
   );
 }
 

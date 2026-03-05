@@ -1,14 +1,15 @@
-import { Stack } from 'expo-router'
-import React from 'react'
+import { useTheme } from '@/src/context/ThemeContext';
+import { Stack } from 'expo-router';
+import React from 'react';
 
 const StackProfile = () => {
+    const { isDark } = useTheme();
+
     return (
         <Stack
             screenOptions={{
 
-                contentStyle: {
-                    backgroundColor: 'white'
-                },
+                contentStyle: { backgroundColor: isDark ? '#454958' : '#FFFFFF' },
                 headerStyle: {
                     backgroundColor: '#0A84FF', // 🔵 azul
                 },
@@ -57,7 +58,7 @@ const StackProfile = () => {
                     title: 'Certificado',
                     headerShown: false, // Ya tiene header custom
                     presentation: 'card',
-                }} 
+                }}
             />
             <Stack.Screen
                 name='rankin/index'
@@ -65,7 +66,7 @@ const StackProfile = () => {
                     title: 'Certificado',
                     headerShown: false, // Ya tiene header custom
                     presentation: 'card',
-                }} 
+                }}
             />
 
         </Stack>

@@ -1,28 +1,31 @@
 import ProgressCard from '@/components/shared/ProgressCard';
 import { AVATARS } from '@/src/const/avatar';
-import { generarCertificacion, obtenerCertificadoPorSlug } from '@/src/services/Certificacionservices'; // ✅ AGREGAR
-import { useModuleViewModel } from '@/src/viewmodels/ModuleViewModel'; // ✅ AGREGAR
+import { useTheme } from '@/src/context/ThemeContext';
+import { generarCertificacion, obtenerCertificadoPorSlug } from '@/src/services/Certificacionservices';
+import { useModuleViewModel } from '@/src/viewmodels/ModuleViewModel';
 import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-
 const ProfileScreen = () => {
-
   const router = useRouter();
+  const { isDark } = useTheme();
   const [generatingCertificate, setGeneratingCertificate] = useState<number | null>(null);
 
+  const colors = {
+    background: isDark ? '#343734' : '#AFCBFF',
+    card: isDark ? '#343734' : '#F9FAFB',
+    text: isDark ? '#FFFFFF' : '#111827',
+    subtext: isDark ? '#D1D5DB' : '#6B7280',
+    border: isDark ? '#555555' : '#E5E7EB',
+    icon: isDark ? '#FFFFFF' : '#000000',
+    inputsColor: isDark ? '#616461' : '#FFFFFF'
+  };
+
   const { user, loading: userLoading, error: userError, fetchUser } = useUserViewModel();
-  const {
-    modulesWithProgress,
-    loading: modulesLoading,
-    error: modulesError,
-    fetchModulesWithProgress
-  } = useModuleViewModel();
-
-
+  const { modulesWithProgress, loading: modulesLoading, error: modulesError, fetchModulesWithProgress } = useModuleViewModel();
 
   useFocusEffect(
     useCallback(() => {
@@ -34,8 +37,6 @@ const ProfileScreen = () => {
   const handleVerCertificado = async (moduloId: number, moduloSlug: string) => {
     try {
       setGeneratingCertificate(moduloId);
-
-      // Primero intentar obtener certificado existente
       try {
         const response = await obtenerCertificadoPorSlug(moduloSlug);
         if (response.success && response.data) {
@@ -50,50 +51,37 @@ const ProfileScreen = () => {
           });
           return;
         }
-      } catch {
-        // No existe aún, proceder a generar
-      }
+      } catch { }
 
-      // Generar certificado
-      Alert.alert(
-        'Generar Certificado',
-        '¿Deseas generar tu certificado? Esto puede tardar unos segundos.',
-        [
-          { text: 'Cancelar', style: 'cancel', onPress: () => setGeneratingCertificate(null) },
-          {
-            text: 'Generar',
-            onPress: async () => {
-              try {
-                const genResponse = await generarCertificacion(moduloId);
-                if (!genResponse.success) throw new Error('No se pudo generar');
-
-                // Esperar 3 segundos a que el backend procese
-                await new Promise(resolve => setTimeout(resolve, 3000));
-
-                // Reintentar obtener con el slug
-                const certResponse = await obtenerCertificadoPorSlug(moduloSlug);
-
-                if (certResponse.success && certResponse.data) {
-                  router.push({
-                    pathname: '/(tabs)/(stack)/certificado',
-                    params: {
-                      codigo: certResponse.data.codigo,
-                      modulo: certResponse.data.modulo.titulo,
-                      porcentaje: certResponse.data.porcentaje_obtenido.toString(),
-                      fecha: certResponse.data.fecha_emision,
-                    }
-                  });
-                }
-              } catch (genErr: any) {
-                Alert.alert('Error', genErr?.response?.data?.message || 'No se pudo generar el certificado');
-              } finally {
-                setGeneratingCertificate(null);
+      Alert.alert('Generar Certificado', '¿Deseas generar tu certificado?', [
+        { text: 'Cancelar', style: 'cancel', onPress: () => setGeneratingCertificate(null) },
+        {
+          text: 'Generar',
+          onPress: async () => {
+            try {
+              const genResponse = await generarCertificacion(moduloId);
+              if (!genResponse.success) throw new Error('No se pudo generar');
+              await new Promise(resolve => setTimeout(resolve, 3000));
+              const certResponse = await obtenerCertificadoPorSlug(moduloSlug);
+              if (certResponse.success && certResponse.data) {
+                router.push({
+                  pathname: '/(tabs)/(stack)/certificado',
+                  params: {
+                    codigo: certResponse.data.codigo,
+                    modulo: certResponse.data.modulo.titulo,
+                    porcentaje: certResponse.data.porcentaje_obtenido.toString(),
+                    fecha: certResponse.data.fecha_emision,
+                  }
+                });
               }
+            } catch (genErr: any) {
+              Alert.alert('Error', genErr?.response?.data?.message || 'No se pudo generar el certificado');
+            } finally {
+              setGeneratingCertificate(null);
             }
           }
-        ]
-      );
-
+        }
+      ]);
     } catch (err: any) {
       Alert.alert('Error', err.message || 'No se pudo obtener el certificado');
       setGeneratingCertificate(null);
@@ -102,60 +90,56 @@ const ProfileScreen = () => {
 
   if (userLoading || modulesLoading) {
     return (
-      <View className="flex-1 bg-primary-500 rounded-3xl p-4 my-10 border border-secondary-100/10 mx-3 items-center justify-center">
+      <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 24, padding: 16, marginVertical: 40, marginHorizontal: 12, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator size="large" color="#0099FF" />
-        <Text className="text-secondary mt-4">Cargando perfil...</Text>
+        <Text style={{ color: colors.text, marginTop: 16, fontFamily: 'Barlow-Medium' }}>Cargando perfil...</Text>
       </View>
     );
   }
 
   if (userError || modulesError) {
     return (
-      <View className="flex-1 bg-primary-500 rounded-3xl p-4 my-10 border border-secondary-100/10 mx-3 items-center justify-center">
-        <Text className="text-red-500">Error: {userError || modulesError}</Text>
+      <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 24, padding: 16, marginVertical: 40, marginHorizontal: 12, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#EF4444' }}>Error: {userError || modulesError}</Text>
         <TouchableOpacity
-          onPress={() => {
-            fetchUser();
-            fetchModulesWithProgress();
-          }}
-          className="mt-4 bg-primary-200 px-6 py-3 rounded-xl"
+          onPress={() => { fetchUser(); fetchModulesWithProgress(); }}
+          style={{ marginTop: 16, backgroundColor: '#0099FF', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
         >
-          <Text className="text-white font-barlow-semibold">Reintentar</Text>
+          <Text style={{ color: '#FFFFFF', fontFamily: 'Barlow-SemiBold' }}>Reintentar</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View className='flex-1 bg-primary-600 rounded-3xl p-4 my-10 border border-secondary-100/10 mx-3'>
-      <View className="flex-row justify-end">
+    <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 24, padding: 16, marginVertical: 40, marginHorizontal: 12, borderWidth: 1, borderColor: colors.border }}>
+      
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
         <TouchableOpacity onPress={() => router.push(`/profile/${user?.id || '1'}`)}>
-          <FontAwesome5 name="edit" size={28} color="#000" />
+          <FontAwesome5 name="edit" size={28} color={colors.icon} />
         </TouchableOpacity>
       </View>
 
-      <View className='items-center justify-center'>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
         <Image
-          style={{ width: 160, resizeMode: 'contain', marginTop: 6, borderRadius: 50, height: 160 }}
+          style={{ width: 160, height: 160, resizeMode: 'contain', marginTop: 6, borderRadius: 80 }}
           source={AVATARS[user?.avatar_id || 1]}
         />
-
-        <Text className='font-barlow-medium text-center mb-3 text-2xl text-secondary'>
+        <Text style={{ fontFamily: 'Barlow-Medium', textAlign: 'center', marginBottom: 12, fontSize: 24, color: colors.text }}>
           {user?.nombre || 'Usuario'}
         </Text>
       </View>
 
-      <View className="flex-row justify-between items-center mt-2 mb-2">
-        <Text className='font-barlow-bold text-2xl text-secondary'>PROGRESO</Text>
-
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 8 }}>
+        <Text style={{ fontFamily: 'Barlow-Bold', fontSize: 24, color: colors.text }}>PROGRESO</Text>
         {modulesWithProgress.length > 0 && (
-          <Text className="font-barlow-semibold text-sm text-secondary-100">
+          <Text style={{ fontFamily: 'Barlow-SemiBold', fontSize: 14, color: colors.subtext }}>
             {modulesWithProgress.filter(m => m.progreso === 100).length}/{modulesWithProgress.length} completados
           </Text>
         )}
       </View>
 
-      <ScrollView className='flex-1 mt-2' showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1, marginTop: 8 }} showsVerticalScrollIndicator={false}>
         {modulesWithProgress.length > 0 ? (
           modulesWithProgress.map((module) => (
             <ProgressCard
@@ -174,8 +158,8 @@ const ProfileScreen = () => {
             />
           ))
         ) : (
-          <View className="items-center justify-center py-12">
-            <Text className="text-secondary-100 font-barlow-medium">
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 48 }}>
+            <Text style={{ color: colors.subtext, fontFamily: 'Barlow-Medium' }}>
               No hay módulos disponibles
             </Text>
           </View>
