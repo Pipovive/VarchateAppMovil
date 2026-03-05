@@ -1,112 +1,127 @@
-import Button from '@/components/shared/button'
-import Divider from '@/components/shared/divider'
-import Input from '@/components/shared/input'
-import { useRegisterViewModel } from '@/src/viewmodels/RegisterViewModel'
-import axios from 'axios'
-import { router } from 'expo-router'
-import React, { useState } from 'react'
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native'
+import Button from '@/components/shared/button';
+import Divider from '@/components/shared/divider';
+import Input from '@/components/shared/input';
+// import { useGoogleSignIn } from '@/src/services/googleAuth'; // ← importa el hook
+import { useRegisterViewModel } from '@/src/viewmodels/RegisterViewModel';
+import axios from 'axios';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('')
+  const [googleIniciado, setGoogleIniciado] = useState(false);
   const [nombre, setNombre] = useState('')
   const [validPassword, setValidPassword] = useState('')
   const [checked, setChecked] = useState(false)
   const [isLoading, setIsLoading] = useState(false) // ← Estado de carga
   const { registerUser } = useRegisterViewModel()
+  // const { request, response, promptAsync } = useGoogleSignIn(); // ← úsalo
 
-const handleRegister = async () => {
-  if (!email || !nombre || !password || !validPassword || !checked) {
-    alert('Completa todos los campos')
-    return
-  }
+  const handleRegister = async () => {
+    if (!email || !nombre || !password || !validPassword || !checked) {
+      alert('Completa todos los campos')
+      return
+    }
 
-  if (password !== validPassword) {
-    alert('Las contraseñas no coinciden')
-    return
-  }
+    if (password !== validPassword) {
+      alert('Las contraseñas no coinciden')
+      return
+    }
 
-  setIsLoading(true)
+    setIsLoading(true)
 
-  try {
-    console.log('🚀 Screen: Iniciando registro...')
-    console.log('📦 Datos:', { nombre, email, password: '***' })
-    
-    const result = await registerUser(nombre, email, password, validPassword, checked)
-    
-    console.log('✅ Screen: Resultado recibido:', result)
+    try {
+      console.log('🚀 Screen: Iniciando registro...')
+      console.log('📦 Datos:', { nombre, email, password: '***' })
 
-    // ✅ Detener loading antes de navegar
-    setIsLoading(false)
-    
-    // Navegar después de un pequeño delay
-    setTimeout(() => {
-      router.replace('/(stack)/confirmed')
-    }, 200)
-    
-    return
+      const result = await registerUser(nombre, email, password, validPassword, checked)
 
-  } catch (error: unknown) {
-    console.log('❌ Screen: Error capturado:', error)
-    
-    setIsLoading(false)
+      console.log('✅ Screen: Resultado recibido:', result)
 
-    // 1️⃣ Error de Axios
-    if (axios.isAxiosError(error)) {
-      console.log('📡 Axios Error')
-      console.log('Status:', error.response?.status)
-      console.log('Data:', error.response?.data)
-      console.log('Message:', error.message)
-      
-      // 🔴 Error de validación (422)
-      if (error.response?.status === 422) {
-        const data = error.response.data as {
-          message?: string
-          errors?: Record<string, string[]>
-        }
+      // ✅ Detener loading antes de navegar
+      setIsLoading(false)
 
-        if (data.errors) {
-          const firstError = Object.values(data.errors)[0][0]
-          alert(firstError)
+      // Navegar después de un pequeño delay
+      setTimeout(() => {
+        router.replace('/(stack)/confirmed')
+      }, 200)
+
+      return
+
+    } catch (error: unknown) {
+      console.log('❌ Screen: Error capturado:', error)
+
+      setIsLoading(false)
+
+      // 1️⃣ Error de Axios
+      if (axios.isAxiosError(error)) {
+        console.log('📡 Axios Error')
+        console.log('Status:', error.response?.status)
+        console.log('Data:', error.response?.data)
+        console.log('Message:', error.message)
+
+        // 🔴 Error de validación (422)
+        if (error.response?.status === 422) {
+          const data = error.response.data as {
+            message?: string
+            errors?: Record<string, string[]>
+          }
+
+          if (data.errors) {
+            const firstError = Object.values(data.errors)[0][0]
+            alert(firstError)
+            return
+          }
+
+          alert(data.message || 'Datos inválidos')
           return
         }
 
-        alert(data.message || 'Datos inválidos')
+        // 🔐 Credenciales incorrectas (401)
+        if (error.response?.status === 401) {
+          alert('Credenciales incorrectas')
+          return
+        }
+
+        // 🌐 Error de red (sin respuesta)
+        if (!error.response) {
+          console.log('🔴 Sin respuesta del servidor')
+          console.log('Request:', error.request)
+          alert('No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.')
+          return
+        }
+
+        // Otros errores HTTP
+        alert(error.response?.data?.message || error.message)
         return
       }
 
-      // 🔐 Credenciales incorrectas (401)
-      if (error.response?.status === 401) {
-        alert('Credenciales incorrectas')
+      // 2️⃣ Error manual
+      if (error instanceof Error) {
+        console.log('⚠️ Error instanceof Error:', error.message)
+        alert(error.message)
         return
       }
 
-      // 🌐 Error de red (sin respuesta)
-      if (!error.response) {
-        console.log('🔴 Sin respuesta del servidor')
-        console.log('Request:', error.request)
-        alert('No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.')
-        return
-      }
-
-      // Otros errores HTTP
-      alert(error.response?.data?.message || error.message)
-      return
+      // 3️⃣ Error desconocido
+      console.log('❓ Error desconocido:', error)
+      alert('Ocurrió un error inesperado')
     }
-
-    // 2️⃣ Error manual
-    if (error instanceof Error) {
-      console.log('⚠️ Error instanceof Error:', error.message)
-      alert(error.message)
-      return
-    }
-
-    // 3️⃣ Error desconocido
-    console.log('❓ Error desconocido:', error)
-    alert('Ocurrió un error inesperado')
   }
-}
+  // React.useEffect(() => {
+  //   if (!googleIniciado) return; // ← ignora si no iniciaste el login
+
+  //   console.log('🔄 Response:', response);
+  //   if (response?.type === 'success') {
+  //     const token = response.authentication?.accessToken;
+  //     console.log('✅ Token:', token);
+  //   }
+  //   if (response?.type === 'dismiss') {
+  //     console.log('⚠️ Usuario cerró el login');
+  //   }
+  // }, [response]);
 
   return (
     <>
@@ -189,9 +204,16 @@ const handleRegister = async () => {
         </Button>
         <Divider />
 
-        <View className='flex-row items-center justify-between'>
-          <Button variant='google' className='px-10' disabled={isLoading}>Gmail</Button>
-        </View>
+        <Button
+          variant='google'
+          className='px-10'
+          disabled={isLoading}
+          onPress={() => {
+            setGoogleIniciado(true);
+          }} // ← así
+        >
+          Gmail
+        </Button>
       </View>
 
       <View className='flex-row items-center mt-4 justify-center'>

@@ -1,13 +1,16 @@
 {
   "expo": {
-    
     "name": "VarchateApp",
     "slug": "VarchateApp",
+    "owner": "chavez_dev", // ← agrega esto con tu username real
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/indefinido.png",
     "scheme": "varchateapp",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -16,15 +19,14 @@
     },
     "android": {
       "package": "com.varchate.app",
-       "intentFilters": [
+      "intentFilters": [
         {
           "action": "VIEW",
           "autoVerify": true,
           "data": [
             {
-              "scheme": "https",
-              "host": "auth.expo.io",
-              "pathPrefix": "/@chavez_dev/VarchateApp"
+              "scheme": "com.varchate.app",
+              "host": "oauthredirect"
             }
           ],
           "category": [
@@ -44,7 +46,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
+      "favicon": "./assets/images/indefinido.png",
       "bundler": "metro"
     },
     "plugins": [
