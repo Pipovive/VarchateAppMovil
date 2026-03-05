@@ -77,7 +77,7 @@ const LoginScreen = () => {
 
   return (
     <>
-      <View className='mx-3 justify-center items-center' pointerEvents="none">
+      <View className='mx-3 justify-center items-center' pointerEvents="none" >
         <Image style={{ width: 200, resizeMode: 'contain', marginTop: 20 }} source={require('../../../assets/images/logo2.png')} />
         <Image style={{ width: 200, resizeMode: 'contain', marginTop: -100 }} source={require('../../../assets/images/gato_computador.png')} />
       </View>
@@ -104,6 +104,7 @@ const LoginScreen = () => {
           autoCapitalize='none'
           onChangeText={setEmail}
           editable={!loading}
+          
         />
 
         <Input

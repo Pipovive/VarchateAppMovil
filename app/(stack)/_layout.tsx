@@ -22,7 +22,8 @@ const StackLayout = () => {
             <Stack.Screen
                 name='register/index'
                 options={{
-                    title: 'Register'
+                    title: 'Register',
+                    contentStyle: { backgroundColor: isDark ? '#343734' : '#FFFFFF' } 
 
                 }} />
 
@@ -36,7 +37,8 @@ const StackLayout = () => {
             <Stack.Screen
                 name='login/index'
                 options={{
-                    title: 'Login'
+                    title: 'Login',
+                    contentStyle: { backgroundColor: isDark ? '#343734' : '#FFFFFF' } 
 
                 }} />
 

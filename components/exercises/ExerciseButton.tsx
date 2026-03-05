@@ -55,9 +55,9 @@ export const ExerciseButton = ({
         setSelectedOption(null);
         clearCurrentAttempt();
 
-        if (!exerciseData) {
-            await fetchExercises(moduloId, leccionId);
-        }
+        reset(); // ← mover aquí para limpiar datos viejos ANTES de cargar
+
+        await fetchExercises(moduloId, leccionId); // ← siempre fetch, sin el if
     };
 
     const handleCloseModal = () => {
@@ -75,7 +75,7 @@ export const ExerciseButton = ({
         }
 
         const currentExercise = exerciseData.ejercicios[currentExerciseIndex];
-        
+
         if (!currentExercise) {
             console.log("❌ currentExercise es undefined en índice:", currentExerciseIndex);
             console.log("❌ Total ejercicios:", exerciseData.ejercicios.length);
@@ -101,7 +101,7 @@ export const ExerciseButton = ({
         if (!exerciseData) return;
 
         const currentExercise = exerciseData.ejercicios[currentExerciseIndex];
-        
+
         if (!currentExercise) {
             console.log("❌ currentExercise es undefined");
             return;
@@ -123,7 +123,7 @@ export const ExerciseButton = ({
 
     const handleNext = () => {
         if (!exerciseData) return;
-
+          console.log('📋 Ejercicios disponibles:', exerciseData.ejercicios.map(e => e.id));
         console.log('➡️ Siguiente ejercicio. Índice actual:', currentExerciseIndex);
         console.log('➡️ Total ejercicios:', exerciseData.ejercicios.length);
 
@@ -194,13 +194,14 @@ export const ExerciseButton = ({
 
             {/* MODAL DE EJERCICIOS */}
             <Modal
+                key={`modal-${leccionId}`}
                 visible={modalVisible}
                 animationType="slide"
                 transparent={true}
                 onRequestClose={handleCloseModal}
             >
-                
-                <View style={{ flex: 1, backgroundColor: '#EAF4FF', paddingBottom:80  }}>
+
+                <View style={{ flex: 1, backgroundColor: '#EAF4FF', paddingBottom: 80 }}>
                     {/* HEADER */}
                     <View style={{
                         backgroundColor: '#0099FF',
@@ -245,7 +246,7 @@ export const ExerciseButton = ({
                     </View>
 
                     {/* CONTENIDO */}
-                    <ScrollView 
+                    <ScrollView
                         style={{ flex: 1 }}
                         contentContainerStyle={{
                             padding: 20,
