@@ -1,6 +1,7 @@
 import CustomDrawerButton from "@/components/shared/customDrawer";
 import { useLessons } from "@/src/context/LessonContext";
 import { useCurrentModule } from "@/src/context/ModuleContext";
+import { useTheme } from "@/src/context/ThemeContext";
 import { DrawerContentComponentProps, DrawerContentScrollView, useDrawerStatus } from "@react-navigation/drawer";
 import { router } from "expo-router";
 import { Drawer } from "expo-router/drawer";
@@ -11,58 +12,54 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CompetitionLayout() {
   const insets = useSafeAreaInsets();
-
+  const { isDark } = useTheme();
 
   return (
     <Drawer
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: isDark ? '#1B1D23' : '#FFFFFF',
           width: 300,
           paddingTop: insets.top
         },
       }}
       drawerContent={(props) => <CustomContent {...props} />}
     >
-      <Drawer.Screen
-        name="competition/[slug]"
-        options={{ title: "Introducción", drawerLabel: "Introducción" }}
-      />
-      <Drawer.Screen
-        name="lesson/[id]"
-        options={{ title: "Lección", drawerLabel: "Lección" }}
-      />
-      <Drawer.Screen
-        name="evaluate/index"
-        options={{ title: "Evaluación", drawerLabel: "Evaluación" }}
-      />
+      <Drawer.Screen name="competition/[slug]" options={{ title: "Introducción", drawerLabel: "Introducción" }} />
+      <Drawer.Screen name="lesson/[id]" options={{ title: "Lección", drawerLabel: "Lección" }} />
+      <Drawer.Screen name="evaluate/index" options={{ title: "Evaluación", drawerLabel: "Evaluación" }} />
     </Drawer>
   );
 }
 
 function CustomContent(props: DrawerContentComponentProps) {
   const currentRoute = props.state.routeNames[props.state.index];
-
   const { currentModule } = useCurrentModule();
-  const {
-    lessons,
-    statistics,
-    loading,
-    error,
-    fetchLessons
-  } = useLessons();
+  const { lessons, statistics, loading, error, fetchLessons } = useLessons();
+  const { isDark } = useTheme();
+  const isDrawerOpen = useDrawerStatus();
 
+  const colors = {
+    background:       isDark ? '#1B1D23' : '#FFFFFF',
+    border:           isDark ? '#374151' : '#E5E7EB',
+    moduleTitle:      isDark ? '#60B4FF' : '#0099FF',
+    progressBg:       isDark ? '#1E3A5F' : '#EFF6FF',
+    progressText:     isDark ? '#93C5FD' : '#1E40AF',
+    warningBg:        isDark ? '#3B2A00' : '#FEF3C7',
+    warningText:      isDark ? '#FCD34D' : '#92400E',
+    errorBg:          isDark ? '#3B1515' : '#FEE2E2',
+    errorText:        isDark ? '#FCA5A5' : '#991B1B',
+    emptyBg:          isDark ? '#272B35' : '#F3F4F6',
+    emptyText:        isDark ? '#9CA3AF' : '#6B7280',
+    loadingText:      isDark ? '#9CA3AF' : '#6B7280',
+  };
 
- const isDrawerOpen = useDrawerStatus();
-
-useEffect(() => {
+  useEffect(() => {
     if (isDrawerOpen === 'open' && currentModule) {
-        console.log('📚 Drawer abierto: recargando lecciones');
-        fetchLessons(currentModule.slug);
+      fetchLessons(currentModule.slug);
     }
-}, [isDrawerOpen, currentModule]);
-
+  }, [isDrawerOpen, currentModule]);
 
   const handleIntroPress = () => {
     if (!currentModule) return;
@@ -74,26 +71,17 @@ useEffect(() => {
       alert(`🔒 Esta lección está bloqueada.\n\nCompleta la lección anterior primero.`);
       return;
     }
-
-    // ✅ VALIDAR que currentModule exista
     if (!currentModule) {
-      console.log('❌ No hay módulo en el contexto');
       alert('Error: No se encontró el módulo activo');
       return;
     }
-
-    console.log('📖 Navegando a lección:', lesson.id, 'Módulo:', currentModule.slug);
     router.push({
       pathname: '/(tabs)/(drawer)/lesson/[id]',
-      params: {
-        id: lesson.id.toString(),
-        moduleSlug: currentModule.slug
-      }
+      params: { id: lesson.id.toString(), moduleSlug: currentModule.slug }
     });
   };
 
   const handleEvaluatePress = () => {
-    // ✅ CORREGIDO: Solo verificar si completó todas las lecciones
     if (statistics && statistics.completadas < statistics.disponibles) {
       alert(
         `⚠️ Completa todas las lecciones primero\n\n` +
@@ -101,11 +89,9 @@ useEffect(() => {
       );
       return;
     }
-
     router.push('/(tabs)/(drawer)/evaluate');
   };
 
-  // ✅ Verificar si todas las lecciones están completadas
   const allLessonsCompleted = statistics
     ? statistics.completadas >= statistics.disponibles
     : false;
@@ -114,21 +100,22 @@ useEffect(() => {
     <DrawerContentScrollView
       {...props}
       contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 0 }}
-      style={{ backgroundColor: "#FFFFFF" }}
+      style={{ backgroundColor: colors.background }}
     >
       <View style={{ paddingHorizontal: 20 }}>
-        {/* ✅ HEADER MEJORADO */}
+
+        {/* HEADER */}
         {currentModule ? (
           <View style={{
             marginBottom: 24,
             paddingBottom: 20,
             borderBottomWidth: 1,
-            borderBottomColor: '#E5E7EB'
+            borderBottomColor: colors.border
           }}>
             <Text style={{
               fontSize: 20,
               fontWeight: 'bold',
-              color: '#0099FF',
+              color: colors.moduleTitle,
               fontFamily: 'Barlow-Bold',
               marginBottom: 8
             }}>
@@ -136,7 +123,7 @@ useEffect(() => {
             </Text>
             {statistics && (
               <View style={{
-                backgroundColor: '#EFF6FF',
+                backgroundColor: colors.progressBg,
                 paddingHorizontal: 12,
                 paddingVertical: 6,
                 borderRadius: 8,
@@ -144,7 +131,7 @@ useEffect(() => {
               }}>
                 <Text style={{
                   fontSize: 12,
-                  color: '#1E40AF',
+                  color: colors.progressText,
                   fontFamily: 'Barlow-SemiBold'
                 }}>
                   ✓ {statistics.completadas}/{statistics.disponibles} completadas
@@ -156,12 +143,12 @@ useEffect(() => {
           <View style={{
             marginBottom: 24,
             padding: 12,
-            backgroundColor: '#FEF3C7',
+            backgroundColor: colors.warningBg,
             borderRadius: 8
           }}>
             <Text style={{
               fontSize: 13,
-              color: '#92400E',
+              color: colors.warningText,
               fontFamily: 'Barlow-SemiBold'
             }}>
               ⚠️ Selecciona un módulo
@@ -169,7 +156,7 @@ useEffect(() => {
           </View>
         )}
 
-        {/* INTRODUCCIÓN - ✅ SIN LOCKED */}
+        {/* INTRODUCCIÓN */}
         <View style={{ marginBottom: 8 }}>
           <CustomDrawerButton
             variant={currentRoute.includes("competition") ? "active" : "no-active"}
@@ -180,11 +167,7 @@ useEffect(() => {
         </View>
 
         {/* SEPARADOR */}
-        <View style={{
-          height: 1,
-          backgroundColor: '#E5E7EB',
-          marginVertical: 12
-        }} />
+        <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 12 }} />
 
         {/* LECCIONES */}
         {loading ? (
@@ -193,7 +176,7 @@ useEffect(() => {
             <Text style={{
               marginTop: 12,
               fontSize: 13,
-              color: '#6B7280',
+              color: colors.loadingText,
               fontFamily: 'Barlow-Medium'
             }}>
               Cargando lecciones...
@@ -203,13 +186,13 @@ useEffect(() => {
           <View style={{
             paddingVertical: 20,
             paddingHorizontal: 16,
-            backgroundColor: '#FEE2E2',
+            backgroundColor: colors.errorBg,
             borderRadius: 8,
             marginBottom: 12
           }}>
             <Text style={{
               fontSize: 13,
-              color: '#991B1B',
+              color: colors.errorText,
               textAlign: 'center',
               fontFamily: 'Barlow-Medium'
             }}>
@@ -218,7 +201,7 @@ useEffect(() => {
           </View>
         ) : lessons.length > 0 ? (
           <>
-            {lessons.map((lesson: any, index: number) => (
+            {lessons.map((lesson: any) => (
               <View key={lesson.id} style={{ marginBottom: 8 }}>
                 <CustomDrawerButton
                   variant={currentRoute.includes("lesson") ? "active" : "no-active"}
@@ -235,13 +218,13 @@ useEffect(() => {
           <View style={{
             paddingVertical: 20,
             paddingHorizontal: 16,
-            backgroundColor: '#F3F4F6',
+            backgroundColor: colors.emptyBg,
             borderRadius: 8,
             marginBottom: 12
           }}>
             <Text style={{
               fontSize: 13,
-              color: '#6B7280',
+              color: colors.emptyText,
               textAlign: 'center',
               fontFamily: 'Barlow-Medium'
             }}>
@@ -252,14 +235,10 @@ useEffect(() => {
 
         {/* SEPARADOR */}
         {lessons.length > 0 && (
-          <View style={{
-            height: 1,
-            backgroundColor: '#E5E7EB',
-            marginVertical: 12
-          }} />
+          <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 12 }} />
         )}
 
-        {/* EVALUACIÓN - ✅ SIN LOCKED si completó todo */}
+        {/* EVALUACIÓN */}
         {lessons.length > 0 && (
           <View style={{ marginBottom: 20 }}>
             <CustomDrawerButton
@@ -272,6 +251,7 @@ useEffect(() => {
             </CustomDrawerButton>
           </View>
         )}
+
       </View>
     </DrawerContentScrollView>
   );

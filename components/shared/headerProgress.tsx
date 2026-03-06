@@ -1,3 +1,4 @@
+import { useTheme } from "@/src/context/ThemeContext";
 import { useModuleViewModel } from "@/src/viewmodels/ModuleViewModel";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -7,26 +8,46 @@ import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-
 type Props = {
   title: string;
   activeSlug: string;
 };
 
 export function TopProgressHeader({ title, activeSlug }: Props) {
-  const { 
-    modules, 
-    modulesWithProgress, 
-    loading, 
-    fetchModules, 
-    fetchModulesWithProgress 
+  const { isDark } = useTheme();
+  const {
+    modules,
+    modulesWithProgress,
+    loading,
+    fetchModules,
+    fetchModulesWithProgress
   } = useModuleViewModel();
 
+  const colors = {
+    // Barra superior (progress bar)
+    headerBg:        isDark ? '#1F2937' : '#0099FF',
+    progressTrack:   isDark ? '#374151' : '#BFDBFE',
+    progressFill:    isDark ? '#3B82F6' : '#0099FF',
+    progressText:    isDark ? '#F3F4F6' : '#FFFFFF',
+
+    // Barra inferior (pills)
+    pillsBarBg:      isDark ? '#272B35' : '#D3E8FF',
+    menuBg:          isDark ? '#1B1D23' : '#FFFFFF',
+    menuIcon:        isDark ? '#60B4FF' : '#0099FF',
+
+    // Pills inactivas
+    pillBg:          isDark ? '#374151' : '#FFFFFF',
+    pillText:        isDark ? '#93C5FD' : '#0099FF',
+
+    // Pill activa
+    pillActiveBg:    isDark ? '#1E3A5F' : '#0099FF',
+    pillActiveText:  isDark ? '#FFFFFF' : '#FFFFFF',
+
+    loadingText:     isDark ? '#9CA3AF' : '#6B7280',
+  };
+
   React.useEffect(() => {
-    if (modules.length === 0) {
-      fetchModules();
-    }
-    // ✅ Cargar progreso real de los módulos
+    if (modules.length === 0) fetchModules();
     fetchModulesWithProgress();
   }, []);
 
@@ -34,18 +55,13 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
     if (slug === activeSlug) return;
     router.replace({
       pathname: '/(tabs)/(drawer)/competition/[slug]',
-      params: { slug: slug }
+      params: { slug }
     });
   };
 
   const navigation = useNavigation<DrawerNavigationProp<any>>();
   const insets = useSafeAreaInsets();
-  const handleMenuPress = () => {
-    console.log('📱 Abriendo drawer...');
-    navigation.openDrawer();
-  };
 
-  // ✅ Obtener el progreso real del módulo activo
   const currentProgress = React.useMemo(() => {
     const moduleWithProgress = modulesWithProgress.find(m => m.slug === activeSlug);
     return moduleWithProgress?.progreso || 0;
@@ -53,29 +69,52 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
 
   return (
     <>
-      {/* PROGRESS BAR */}
-      <View className="w-full bg-primary-100 px-4 pb-2" style={{ paddingTop: insets.top + 8 }}>
-        <View className="flex-row items-center mb-3">
+      {/* BARRA DE PROGRESO */}
+      <View style={{
+        width: '100%',
+        backgroundColor: colors.headerBg,
+        paddingHorizontal: 16,
+        paddingBottom: 8,
+        paddingTop: insets.top + 8
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           {/* REGRESAR */}
-          <TouchableOpacity
-            className="mr-4"
-            onPress={() => router.replace("/(tabs)/home")}
-          >
-            <Ionicons name="arrow-back" size={28} color="#FFFFFF" />
+          <TouchableOpacity style={{ marginRight: 16 }} onPress={() => router.replace("/(tabs)/home")}>
+            <Ionicons name="arrow-back" size={28} color={colors.progressText} />
           </TouchableOpacity>
 
-          {/* BARRA DE PROGRESO */}
-          <View className="flex-1 bg-quaternary rounded-xl px-3 py-2">
-            <View className="w-full h-8 bg-primary-200 rounded-md overflow-hidden">
-              <View
-                className="h-full bg-primary-100"
-                style={{ width: `${currentProgress}%` }}
-              />
-              <View className="absolute inset-0 flex-row justify-between items-center px-4">
-                <Text className="text-quaternary font-barlow-medium">
+          {/* BARRA */}
+          <View style={{
+            flex: 1,
+            backgroundColor: colors.progressTrack,
+            borderRadius: 12,
+            paddingHorizontal: 12,
+            paddingVertical: 8
+          }}>
+            <View style={{
+              width: '100%',
+              height: 32,
+              backgroundColor: isDark ? '#4B5563' : '#BFDBFE',
+              borderRadius: 6,
+              overflow: 'hidden'
+            }}>
+              <View style={{
+                height: '100%',
+                backgroundColor: colors.progressFill,
+                width: `${currentProgress}%`
+              }} />
+              <View style={{
+                position: 'absolute',
+                top: 0, bottom: 0, left: 0, right: 0,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 16
+              }}>
+                <Text style={{ color: colors.progressText, fontFamily: 'Barlow-Medium', fontSize: 13 }}>
                   {title}
                 </Text>
-                <Text className="text-quaternary font-barlow-bold">
+                <Text style={{ color: colors.progressText, fontFamily: 'Barlow-Bold', fontSize: 13 }}>
                   {currentProgress}%
                 </Text>
               </View>
@@ -84,22 +123,39 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
         </View>
       </View>
 
-      {/* MENU + PILLS */}
-      <View className="w-full bg-[#D3E8FF] px-4 py-4">
-        <View className="flex-row items-center">
+      {/* MENÚ + PILLS */}
+      <View style={{
+        width: '100%',
+        backgroundColor: colors.pillsBarBg,
+        paddingHorizontal: 16,
+        paddingVertical: 16
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {/* MENÚ */}
           <TouchableOpacity
-            className="w-12 h-12 bg-quaternary rounded-2xl items-center justify-center mr-4"
-            style={{ elevation: 4 }}
-            onPress={handleMenuPress}
+            onPress={() => navigation.openDrawer()}
+            style={{
+              width: 48,
+              height: 48,
+              backgroundColor: colors.menuBg,
+              borderRadius: 16,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 16,
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: isDark ? 0.4 : 0.1,
+              shadowRadius: 4,
+            }}
           >
-            <Ionicons name="menu" size={28} color="#0099FF" />
+            <Ionicons name="menu" size={28} color={colors.menuIcon} />
           </TouchableOpacity>
 
           {/* PILLS */}
           {loading && modules.length === 0 ? (
             <View style={{ paddingHorizontal: 16 }}>
-              <Text style={{ fontSize: 12, color: '#6B7280' }}>Cargando...</Text>
+              <Text style={{ fontSize: 12, color: colors.loadingText }}>Cargando...</Text>
             </View>
           ) : (
             <ScrollView
@@ -109,8 +165,6 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
             >
               {modules.map((module) => {
                 const isActive = module.slug === activeSlug;
-                
-                // ✅ Obtener progreso del módulo (si está disponible)
                 const moduleProgress = modulesWithProgress.find(m => m.slug === module.slug);
                 const hasProgress = moduleProgress && moduleProgress.progreso > 0;
 
@@ -119,21 +173,25 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
                     key={module.id}
                     onPress={() => navigateTo(module.slug)}
                     activeOpacity={0.85}
-                    className={`px-6 py-3 rounded-xl ${
-                      isActive ? "bg-primary-200" : "bg-quaternary"
-                    }`}
+                    style={{
+                      paddingHorizontal: 24,
+                      paddingVertical: 12,
+                      borderRadius: 12,
+                      backgroundColor: isActive ? colors.pillActiveBg : colors.pillBg,
+                    }}
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Text
-                        className={`font-barlow-bold text-sm ${
-                          isActive ? "text-quaternary" : "text-primary"
-                        }`}
                         numberOfLines={1}
+                        style={{
+                          fontFamily: 'Barlow-Bold',
+                          fontSize: 14,
+                          color: isActive ? colors.pillActiveText : colors.pillText,
+                        }}
                       >
                         {module.titulo.toUpperCase()}
                       </Text>
-                      
-                      {/* ✅ Mostrar indicador de progreso si tiene */}
+
                       {hasProgress && !isActive && (
                         <View style={{
                           backgroundColor: '#10B981',
@@ -142,8 +200,7 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
                           borderRadius: 3
                         }} />
                       )}
-                      
-                      {/* ✅ Mostrar checkmark si está completado */}
+
                       {moduleProgress?.progreso === 100 && !isActive && (
                         <Text style={{ fontSize: 10 }}>✓</Text>
                       )}

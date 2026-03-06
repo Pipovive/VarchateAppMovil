@@ -1,24 +1,29 @@
 import { AVATARS } from '@/src/const/avatar';
+import { useTheme } from '@/src/context/ThemeContext';
 import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { Tabs } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Image } from 'react-native';
 
-
 const TabsLayout = () => {
-  const { user, loading: userLoading, error: userError, fetchUser } = useUserViewModel();
+  const { user, fetchUser } = useUserViewModel();
+  const { isDark } = useTheme();
+
   useEffect(() => {
-    fetchUser()
-  }, [])
- 
+    fetchUser();
+  }, []);
+
+  const tabBarBg = isDark ? '#1B1D23' : '#0099FF';
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0099FF',
+          backgroundColor: tabBarBg,
           paddingHorizontal: 20,
-          borderTopWidth: 0,
+          borderTopWidth: isDark ? 1 : 0,
+          borderTopColor: isDark ? '#374151' : 'transparent',
           elevation: 0,
           shadowOpacity: 0,
           paddingBottom: 0,
@@ -29,7 +34,7 @@ const TabsLayout = () => {
           fontWeight: '500',
         },
         tabBarActiveTintColor: '#FFFFFF',
-        tabBarInactiveTintColor: '#FFFFFF',
+        tabBarInactiveTintColor: isDark ? '#6B7280' : '#FFFFFF',
       }}
     >
       <Tabs.Screen
@@ -43,9 +48,10 @@ const TabsLayout = () => {
                 width: focused ? 28 : 24,
                 height: focused ? 28 : 24,
                 resizeMode: 'contain',
+                opacity: (!isDark || focused) ? 1 : 0.5,
               }}
             />
-          )
+          ),
         }}
       />
 
@@ -60,9 +66,10 @@ const TabsLayout = () => {
                 width: focused ? 28 : 24,
                 height: focused ? 28 : 24,
                 resizeMode: 'contain',
+                opacity: (!isDark || focused) ? 1 : 0.5,
               }}
             />
-          )
+          ),
         }}
       />
 
@@ -78,9 +85,10 @@ const TabsLayout = () => {
                 width: focused ? 28 : 24,
                 height: focused ? 28 : 24,
                 resizeMode: 'contain',
+                opacity: (!isDark || focused) ? 1 : 0.5,
               }}
             />
-          )
+          ),
         }}
       />
 
@@ -95,9 +103,10 @@ const TabsLayout = () => {
                 width: focused ? 28 : 24,
                 height: focused ? 28 : 24,
                 resizeMode: 'contain',
+                opacity: (!isDark || focused) ? 1 : 0.5,
               }}
             />
-          )
+          ),
         }}
       />
 
@@ -105,30 +114,25 @@ const TabsLayout = () => {
         name="(stack)"
         options={{
           title: 'Perfil',
-          tabBarIcon: () => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={AVATARS[user?.avatar_id || 1]}
               style={{
                 width: 24,
                 height: 24,
                 borderRadius: 12,
-                borderWidth: 1,
-                borderColor: 'white',
+                borderWidth: 2,
+                borderColor: focused ? '#FFFFFF' : isDark ? '#4B5563' : '#FFFFFF',
+                opacity: (!isDark || focused) ? 1 : 0.7,
               }}
             />
           ),
         }}
       />
 
-
-
-
-      {/* Oculta el drawer de los tabs */}
       <Tabs.Screen
         name="(drawer)"
-        options={{
-          href: null, // ← Esto oculta el drawer de la tab bar
-        }}
+        options={{ href: null }}
       />
     </Tabs>
   );

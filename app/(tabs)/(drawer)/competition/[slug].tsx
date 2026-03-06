@@ -3,6 +3,7 @@ import { ModuleHeader } from "@/components/shared/moduleHeader";
 import { WhiteScreenContainer } from "@/components/shared/whiteScreenCard";
 import { useLessons } from "@/src/context/LessonContext";
 import { useCurrentModule } from "@/src/context/ModuleContext";
+import { useTheme } from "@/src/context/ThemeContext";
 import { getModuleBySlug } from "@/src/services/modulesServices";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -14,6 +15,23 @@ export default function CompetitionScreen() {
   const { width } = useWindowDimensions();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
+  const { isDark } = useTheme();
+
+  const colors = {
+    background:       isDark ? '#1B1D23' : '#EAF4FF',
+    loadingText:      isDark ? '#9CA3AF' : '#6B7280',
+    notFoundText:     isDark ? '#F3F4F6' : '#111827',
+    sectionTitle:     isDark ? '#F9FAFB' : '#1F2937',
+    lessonCard:       isDark ? '#272B35' : '#FFFFFF',
+    lessonBorder:     isDark ? '#374151' : '#E5E7EB',
+    lessonTitle:      isDark ? '#F3F4F6' : '#1F2937',
+    emptyBg:          isDark ? '#3B2A00' : '#FEF3C7',
+    emptyText:        isDark ? '#FCD34D' : '#92400E',
+    htmlBody:         isDark ? '#D1D5DB' : '#374151',
+    htmlH:            isDark ? '#F9FAFB' : '#1F2937',
+    htmlCodeBg:       isDark ? '#1F2937' : '#F3F4F6',
+    htmlCode:         isDark ? '#E5E7EB' : '#1F2937',
+  };
 
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [moduleLoading, setModuleLoading] = useState(false);
@@ -24,42 +42,37 @@ export default function CompetitionScreen() {
   useEffect(() => {
     if (!slug) return;
 
-    // Cargar módulo
     setModuleLoading(true);
     getModuleBySlug(slug as string)
       .then((data) => {
         setSelectedModule(data);
-        setCurrentModule(data); // ✅ Guardar en contexto
+        setCurrentModule(data);
         setModuleLoading(false);
       })
       .catch(() => setModuleLoading(false));
 
-    // Cargar lecciones
     fetchLessons(slug as string);
-
   }, [slug]);
 
   if (moduleLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EAF4FF' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator size="large" color="#0099FF" />
-        <Text style={{ marginTop: 12, color: '#6B7280' }}>Cargando...</Text>
+        <Text style={{ marginTop: 12, color: colors.loadingText }}>Cargando...</Text>
       </View>
     );
   }
 
   if (!selectedModule) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Módulo no encontrado</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Text style={{ color: colors.notFoundText }}>Módulo no encontrado</Text>
       </View>
     );
   }
 
-  console.log('🔍 Primeros 100 caracteres:', selectedModule.descripcion_larga.substring(0, 100));
-
   return (
-    <View style={{ flex: 1, backgroundColor: '#EAF4FF' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <TopProgressHeader
         title={selectedModule.titulo}
         activeSlug={slug as string}
@@ -69,8 +82,6 @@ export default function CompetitionScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingTop: 40 }}
         showsVerticalScrollIndicator={false}
       >
-
-
         <WhiteScreenContainer>
           <ModuleHeader />
 
@@ -83,73 +94,39 @@ export default function CompetitionScreen() {
                 .replace(/&amp;/g, '&')
             }}
             tagsStyles={{
-              body: {
-                fontSize: 16,
-                color: '#374151',
-              },
-              p: {
-                marginBottom: 12,
-                marginTop: 0,
-                lineHeight: 24
-              },
-              h2: {
-                fontSize: 20,
-                fontWeight: 'bold',
-                marginTop: 16,
-                marginBottom: 8,
-                color: '#1F2937'
-              },
-              h3: {
-                fontSize: 18,
-                fontWeight: 'bold',
-                marginTop: 12,
-                marginBottom: 6,
-                color: '#1F2937'
-              },
-              ul: {
-                marginTop: 8,
-                marginBottom: 12,
-                paddingLeft: 20
-              },
-              li: {
-                marginBottom: 4,
-                lineHeight: 20
-              },
-              pre: {
-                backgroundColor: '#F3F4F6',
-                padding: 12,
-                borderRadius: 8,
-                marginTop: 8,
-                marginBottom: 12,
-
-              },
-              code: {
-                fontFamily: 'monospace',
-                fontSize: 14,
-                color: '#1F2937'
-              }
+              body: { fontSize: 16, color: colors.htmlBody },
+              p:    { marginBottom: 12, marginTop: 0, lineHeight: 24, color: colors.htmlBody },
+              h2:   { fontSize: 20, fontWeight: 'bold', marginTop: 16, marginBottom: 8, color: colors.htmlH },
+              h3:   { fontSize: 18, fontWeight: 'bold', marginTop: 12, marginBottom: 6, color: colors.htmlH },
+              ul:   { marginTop: 8, marginBottom: 12, paddingLeft: 20 },
+              li:   { marginBottom: 4, lineHeight: 20, color: colors.htmlBody },
+              pre:  { backgroundColor: colors.htmlCodeBg, padding: 12, borderRadius: 8, marginTop: 8, marginBottom: 12 },
+              code: { fontFamily: 'monospace', fontSize: 14, color: colors.htmlCode },
             }}
             systemFonts={['Barlow-Regular', 'Barlow-Bold']}
-            defaultTextProps={{ allowFontScaling: false }} // ← Agrega esto
-            enableExperimentalMarginCollapsing // ← Y esto
+            defaultTextProps={{ allowFontScaling: false }}
+            enableExperimentalMarginCollapsing
           />
-          <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#1F2937', marginTop: 24, marginBottom: 16 }}>
+
+          {/* TÍTULO LECCIONES */}
+          <Text style={{ fontSize: 22, fontWeight: 'bold', color: colors.sectionTitle, marginTop: 24, marginBottom: 16 }}>
             Contenido ({lessons.length} lecciones)
           </Text>
 
+          {/* LISTA DE LECCIONES */}
           {lessonsLoading ? (
             <View style={{ padding: 20, alignItems: 'center' }}>
               <ActivityIndicator size="small" color="#0099FF" />
-              <Text style={{ color: '#6B7280', marginTop: 8 }}>Cargando lecciones...</Text>
+              <Text style={{ color: colors.loadingText, marginTop: 8 }}>Cargando lecciones...</Text>
             </View>
           ) : lessons.length > 0 ? (
             lessons.map((lesson, index) => (
               <TouchableOpacity
                 key={lesson.id}
                 style={{
-                  backgroundColor: 'white',
+                  backgroundColor: colors.lessonCard,
                   borderWidth: 1,
-                  borderColor: '#E5E7EB',
+                  borderColor: colors.lessonBorder,
                   padding: 16,
                   borderRadius: 16,
                   marginBottom: 16,
@@ -162,15 +139,12 @@ export default function CompetitionScreen() {
                   }
                   router.push({
                     pathname: '/(tabs)/(drawer)/lesson/[id]',
-                    params: {
-                      id: lesson.id.toString(),
-                      moduleSlug: slug as string
-                    }
+                    params: { id: lesson.id.toString(), moduleSlug: slug as string }
                   });
                 }}
                 disabled={!lesson.disponible}
               >
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1F2937' }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.lessonTitle }}>
                   {index + 1}. {lesson.titulo}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 8, gap: 8 }}>
@@ -188,11 +162,12 @@ export default function CompetitionScreen() {
               </TouchableOpacity>
             ))
           ) : (
-            <View style={{ padding: 20, alignItems: 'center', backgroundColor: '#FEF3C7', borderRadius: 8 }}>
-              <Text style={{ color: '#92400E', fontSize: 14 }}>No hay lecciones disponibles</Text>
+            <View style={{ padding: 20, alignItems: 'center', backgroundColor: colors.emptyBg, borderRadius: 8 }}>
+              <Text style={{ color: colors.emptyText, fontSize: 14 }}>No hay lecciones disponibles</Text>
             </View>
           )}
 
+          {/* BOTÓN SIGUIENTE */}
           <TouchableOpacity
             style={{
               backgroundColor: '#0099FF',
@@ -211,10 +186,7 @@ export default function CompetitionScreen() {
               if (nextLesson) {
                 router.push({
                   pathname: '/(tabs)/(drawer)/lesson/[id]',
-                  params: {
-                    id: nextLesson.id.toString(),
-                    moduleSlug: slug as string
-                  }
+                  params: { id: nextLesson.id.toString(), moduleSlug: slug as string }
                 });
               } else {
                 alert('No hay lecciones disponibles');
