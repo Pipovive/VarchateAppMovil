@@ -9,12 +9,10 @@ import axios from 'axios';
 // casa lina 192.168.20.27
 // 10.32.22.221
 // 10.32.23.100
-const SERVER_IP = '192.168.20.27'; // ← Solo cambia esto
-const SERVER_PORT = '8000';
-export const BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
+const BASE_URL = "https://api-varchate-v1-production.up.railway.app/api";
 
 const api = axios.create({
-  baseURL: `${BASE_URL}/api`,
+  baseURL: BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -22,6 +20,7 @@ const api = axios.create({
   },
   withCredentials: true
 });
+
 // 🔑 Interceptor de REQUEST - Agregar token automáticamente
 api.interceptors.request.use(
   async (config) => {
