@@ -5,16 +5,18 @@ import { useTheme } from '@/src/context/ThemeContext';
 import { signInWithGoogle } from '@/src/services/googleAuth';
 import { useRegisterViewModel } from '@/src/viewmodels/RegisterViewModel';
 import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
+import { Ionicons } from '@expo/vector-icons';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from 'react-native';
-
 const RegisterScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('')
   const [nombre, setNombre] = useState('')
+  const [showPassword, setShowPassword] = useState(false);
+  const [showValidPassword, setShowValidPassword] = useState(false);
   const [validPassword, setValidPassword] = useState('')
   const [checked, setChecked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -55,6 +57,10 @@ const RegisterScreen = () => {
       alert('Completa todos los campos')
       return
     }
+    if (!passwordValid) {
+      alert('La contraseña no cumple los requisitos')
+      return
+    }
     if (password !== validPassword) {
       alert('Las contraseñas no coinciden')
       return
@@ -69,10 +75,23 @@ const RegisterScreen = () => {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 422) {
           const data = error.response.data as { message?: string; errors?: Record<string, string[]> }
-          if (data.errors) { alert(Object.values(data.errors)[0][0]); return; }
-          alert(data.message || 'Datos inválidos')
-          return
+          if (data.errors) {
+            const primerError = Object.values(data.errors)[0][0];
+            alert(traducirError(primerError));
+            return;
+          }
+          alert(traducirError(data.message || 'Datos inválidos'));
+          return;
         }
+        if (error.response?.status === 401) {
+          alert('Correo o contraseña incorrectos');
+          return;
+        }
+        if (!error.response) {
+          alert('No se pudo conectar con el servidor. Verifica tu conexión.');
+          return;
+        }
+        alert(traducirError(error.response?.data?.message || error.message));
         if (error.response?.status === 401) { alert('Credenciales incorrectas'); return; }
         if (!error.response) { alert('No se pudo conectar con el servidor'); return; }
         alert(error.response?.data?.message || error.message)
@@ -82,6 +101,41 @@ const RegisterScreen = () => {
       alert('Ocurrió un error inesperado')
     }
   }
+
+  const passwordRules = [
+    { label: 'Mínimo 8 caracteres', valid: password.length >= 8 },
+    { label: 'Una letra mayúscula', valid: /[A-Z]/.test(password) },
+    { label: 'Una letra minúscula', valid: /[a-z]/.test(password) },
+    { label: 'Un número', valid: /[0-9]/.test(password) },
+  ];
+  const passwordValid = passwordRules.every(r => r.valid);
+
+  const traducirError = (mensaje: string): string => {
+    const traducciones: Record<string, string> = {
+      // Email
+      'The email field must be a valid email address.': 'El correo electrónico no es válido.',
+      'The email has already been taken.': 'Este correo ya está registrado.',
+      'The email field is required.': 'El correo es obligatorio.',
+      // Nombre
+      'The nombre field is required.': 'El nombre es obligatorio.',
+      'The nombre field must be at least 3 characters.': 'El nombre debe tener al menos 3 caracteres.',
+      // Contraseña
+      'The password field is required.': 'La contraseña es obligatoria.',
+      'The password field must be at least 8 characters.': 'La contraseña debe tener mínimo 8 caracteres.',
+      'The password field confirmation does not match.': 'Las contraseñas no coinciden.',
+      'The password field must contain at least one uppercase and one lowercase letter.': 'La contraseña debe tener mayúsculas y minúsculas.',
+      'The password field must contain at least one number.': 'La contraseña debe contener al menos un número.',
+      // Términos
+      'The terms accepted field must be accepted.': 'Debes aceptar los términos y condiciones.',
+      // Generales
+      'The given data was invalid.': 'Los datos ingresados no son válidos.',
+      'Too Many Attempts.': 'Demasiados intentos. Espera un momento.',
+      'Unauthenticated.': 'Sesión expirada. Inicia sesión nuevamente.',
+      'Server Error': 'Error del servidor. Intenta más tarde.',
+    };
+
+    return traducciones[mensaje] ?? mensaje;
+  };
 
   return (
     <>
@@ -110,14 +164,56 @@ const RegisterScreen = () => {
           keyboardType='email-address' autoCapitalize='none'
           onChangeText={setEmail} editable={!isLoading} />
 
-        <Input isDark={isDark} placeholder='Contraseña' value={password}
-          error={password.length > 0 && password.length < 8 ? 'La contraseña debe tener mínimo 8 caracteres' : ''}
-          secureTextEntry onChangeText={setPassword} editable={!isLoading} />
 
-        <Input isDark={isDark} placeholder='Confirmar contraseña' value={validPassword}
-          error={validPassword !== password ? 'Las contraseñas deben de ser iguales' : ''}
-          secureTextEntry onChangeText={setValidPassword} editable={!isLoading} />
+        <View style={{ position: 'relative', marginBottom: 0 }}>
+          <Input isDark={isDark} placeholder='Contraseña' value={password}
+            secureTextEntry={!showPassword} onChangeText={setPassword} editable={!isLoading} />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={{ position: 'absolute', right: 16, top: 14 }}
+          >
+            <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isDark ? '#9CA3AF' : '#6B7280'} />
+          </TouchableOpacity>
+        </View>
 
+        {/* Indicador de requisitos */}
+        {password.length > 0 && (
+          <View style={{
+            backgroundColor: isDark ? '#1F2937' : '#F9FAFB',
+            borderRadius: 8,
+            padding: 12,
+            marginBottom: 12,
+            borderWidth: 1,
+            borderColor: isDark ? '#374151' : '#E5E7EB'
+          }}>
+            {passwordRules.map((rule, i) => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: i < passwordRules.length - 1 ? 6 : 0 }}>
+                <Text style={{ fontSize: 13, marginRight: 8 }}>
+                  {rule.valid ? '✅' : '⭕'}
+                </Text>
+                <Text style={{
+                  fontSize: 13,
+                  color: rule.valid ? '#10B981' : (isDark ? '#9CA3AF' : '#6B7280'),
+                  fontFamily: 'Barlow-Medium'
+                }}>
+                  {rule.label}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <View style={{ position: 'relative', marginBottom: 0 }}>
+          <Input isDark={isDark} placeholder='Confirmar contraseña' value={validPassword}
+            error={validPassword.length > 0 && validPassword !== password ? 'Las contraseñas no coinciden' : ''}
+            secureTextEntry={!showValidPassword} onChangeText={setValidPassword} editable={!isLoading} />
+          <TouchableOpacity
+            onPress={() => setShowValidPassword(!showValidPassword)}
+            style={{ position: 'absolute', right: 16, top: 14 }}
+          >
+            <Ionicons name={showValidPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isDark ? '#9CA3AF' : '#6B7280'} />
+          </TouchableOpacity>
+        </View>
         {/* Checkbox términos */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
           <TouchableOpacity
@@ -146,7 +242,8 @@ const RegisterScreen = () => {
           </View>
         )}
 
-        <Button variant='contained' className='mt-4' onPress={handleRegister} disabled={!checked || isLoading}>
+        <Button variant='contained' className='mt-4' onPress={handleRegister}
+          disabled={!checked || !passwordValid || isLoading}>
           {isLoading ? 'Registrando...' : 'Registrar'}
         </Button>
 

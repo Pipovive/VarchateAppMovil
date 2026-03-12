@@ -11,9 +11,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type Props = {
   title: string;
   activeSlug: string;
+  mode?: 'competition' | 'lesson'; // ← nuevo prop
 };
 
-export function TopProgressHeader({ title, activeSlug }: Props) {
+export function TopProgressHeader({ title, activeSlug, mode = 'competition' }: Props) {
   const { isDark } = useTheme();
   const {
     modules,
@@ -25,25 +26,25 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
 
   const colors = {
     // Barra superior (progress bar)
-    headerBg:        isDark ? '#1F2937' : '#0099FF',
-    progressTrack:   isDark ? '#374151' : '#BFDBFE',
-    progressFill:    isDark ? '#3B82F6' : '#0099FF',
-    progressText:    isDark ? '#F3F4F6' : '#FFFFFF',
+    headerBg: isDark ? '#1F2937' : '#0099FF',
+    progressTrack: isDark ? '#374151' : '#BFDBFE',
+    progressFill: isDark ? '#3B82F6' : '#0099FF',
+    progressText: isDark ? '#F3F4F6' : '#FFFFFF',
 
     // Barra inferior (pills)
-    pillsBarBg:      isDark ? '#272B35' : '#D3E8FF',
-    menuBg:          isDark ? '#1B1D23' : '#FFFFFF',
-    menuIcon:        isDark ? '#60B4FF' : '#0099FF',
+    pillsBarBg: isDark ? '#272B35' : '#D3E8FF',
+    menuBg: isDark ? '#1B1D23' : '#FFFFFF',
+    menuIcon: isDark ? '#60B4FF' : '#0099FF',
 
     // Pills inactivas
-    pillBg:          isDark ? '#374151' : '#FFFFFF',
-    pillText:        isDark ? '#93C5FD' : '#0099FF',
+    pillBg: isDark ? '#374151' : '#FFFFFF',
+    pillText: isDark ? '#93C5FD' : '#0099FF',
 
     // Pill activa
-    pillActiveBg:    isDark ? '#1E3A5F' : '#0099FF',
-    pillActiveText:  isDark ? '#FFFFFF' : '#FFFFFF',
+    pillActiveBg: isDark ? '#1E3A5F' : '#0099FF',
+    pillActiveText: isDark ? '#FFFFFF' : '#FFFFFF',
 
-    loadingText:     isDark ? '#9CA3AF' : '#6B7280',
+    loadingText: isDark ? '#9CA3AF' : '#6B7280',
   };
 
   React.useEffect(() => {
@@ -79,7 +80,21 @@ export function TopProgressHeader({ title, activeSlug }: Props) {
       }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           {/* REGRESAR */}
-          <TouchableOpacity style={{ marginRight: 16 }} onPress={() => router.replace("/(tabs)/home")}>
+          <TouchableOpacity
+            style={{ marginRight: 16 }}
+            onPress={() => {
+              if (mode === 'lesson') {
+                // Desde lección → volver a competition/[slug]
+                router.replace({
+                  pathname: '/(tabs)/(drawer)/competition/[slug]',
+                  params: { slug: activeSlug }
+                });
+              } else {
+                // Desde competition → volver a home
+                router.replace('/(tabs)/home');
+              }
+            }}
+          >
             <Ionicons name="arrow-back" size={28} color={colors.progressText} />
           </TouchableOpacity>
 

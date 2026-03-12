@@ -6,8 +6,8 @@ interface User {
     nombre: string;
     email: string;
     avatar_id: number;
+    proveedor_auth: 'email' | 'google';
 }
-
 export const useUserViewModel = () => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);

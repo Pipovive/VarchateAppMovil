@@ -16,21 +16,23 @@ export default function CompetitionScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
   const { isDark } = useTheme();
+  const scrollRef = React.useRef<ScrollView>(null);
+
 
   const colors = {
-    background:       isDark ? '#1B1D23' : '#EAF4FF',
-    loadingText:      isDark ? '#9CA3AF' : '#6B7280',
-    notFoundText:     isDark ? '#F3F4F6' : '#111827',
-    sectionTitle:     isDark ? '#F9FAFB' : '#1F2937',
-    lessonCard:       isDark ? '#272B35' : '#FFFFFF',
-    lessonBorder:     isDark ? '#374151' : '#E5E7EB',
-    lessonTitle:      isDark ? '#F3F4F6' : '#1F2937',
-    emptyBg:          isDark ? '#3B2A00' : '#FEF3C7',
-    emptyText:        isDark ? '#FCD34D' : '#92400E',
-    htmlBody:         isDark ? '#D1D5DB' : '#374151',
-    htmlH:            isDark ? '#F9FAFB' : '#1F2937',
-    htmlCodeBg:       isDark ? '#1F2937' : '#F3F4F6',
-    htmlCode:         isDark ? '#E5E7EB' : '#1F2937',
+    background: isDark ? '#1B1D23' : '#EAF4FF',
+    loadingText: isDark ? '#9CA3AF' : '#6B7280',
+    notFoundText: isDark ? '#F3F4F6' : '#111827',
+    sectionTitle: isDark ? '#F9FAFB' : '#1F2937',
+    lessonCard: isDark ? '#272B35' : '#FFFFFF',
+    lessonBorder: isDark ? '#374151' : '#E5E7EB',
+    lessonTitle: isDark ? '#F3F4F6' : '#1F2937',
+    emptyBg: isDark ? '#3B2A00' : '#FEF3C7',
+    emptyText: isDark ? '#FCD34D' : '#92400E',
+    htmlBody: isDark ? '#D1D5DB' : '#374151',
+    htmlH: isDark ? '#F9FAFB' : '#1F2937',
+    htmlCodeBg: isDark ? '#1F2937' : '#F3F4F6',
+    htmlCode: isDark ? '#E5E7EB' : '#1F2937',
   };
 
   const [selectedModule, setSelectedModule] = useState<any>(null);
@@ -40,6 +42,7 @@ export default function CompetitionScreen() {
   const { lessons, loading: lessonsLoading, fetchLessons } = useLessons();
 
   useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
     if (!slug) return;
 
     setModuleLoading(true);
@@ -78,6 +81,7 @@ export default function CompetitionScreen() {
         activeSlug={slug as string}
       />
       <ScrollView
+        ref={scrollRef}  // ← agregar  // ← agregar
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1, paddingTop: 40 }}
         showsVerticalScrollIndicator={false}
@@ -95,12 +99,12 @@ export default function CompetitionScreen() {
             }}
             tagsStyles={{
               body: { fontSize: 16, color: colors.htmlBody },
-              p:    { marginBottom: 12, marginTop: 0, lineHeight: 24, color: colors.htmlBody },
-              h2:   { fontSize: 20, fontWeight: 'bold', marginTop: 16, marginBottom: 8, color: colors.htmlH },
-              h3:   { fontSize: 18, fontWeight: 'bold', marginTop: 12, marginBottom: 6, color: colors.htmlH },
-              ul:   { marginTop: 8, marginBottom: 12, paddingLeft: 20 },
-              li:   { marginBottom: 4, lineHeight: 20, color: colors.htmlBody },
-              pre:  { backgroundColor: colors.htmlCodeBg, padding: 12, borderRadius: 8, marginTop: 8, marginBottom: 12 },
+              p: { marginBottom: 12, marginTop: 0, lineHeight: 24, color: colors.htmlBody },
+              h2: { fontSize: 20, fontWeight: 'bold', marginTop: 16, marginBottom: 8, color: colors.htmlH },
+              h3: { fontSize: 18, fontWeight: 'bold', marginTop: 12, marginBottom: 6, color: colors.htmlH },
+              ul: { marginTop: 8, marginBottom: 12, paddingLeft: 20 },
+              li: { marginBottom: 4, lineHeight: 20, color: colors.htmlBody },
+              pre: { backgroundColor: colors.htmlCodeBg, padding: 12, borderRadius: 8, marginTop: 8, marginBottom: 12 },
               code: { fontFamily: 'monospace', fontSize: 14, color: colors.htmlCode },
             }}
             systemFonts={['Barlow-Regular', 'Barlow-Bold']}
@@ -179,6 +183,7 @@ export default function CompetitionScreen() {
               opacity: lessons.length === 0 ? 0.5 : 1
             }}
             onPress={() => {
+              scrollRef.current?.scrollTo({ y: 0, animated: true }); // ← agregar
               const nextLesson = lessons.find(l => l.disponible && !l.vista) ||
                 lessons.find(l => l.disponible) ||
                 lessons[0];

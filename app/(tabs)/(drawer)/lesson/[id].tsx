@@ -24,7 +24,7 @@ const LessonDetailScreen = () => {
     const { width } = useWindowDimensions();
     const { isDark } = useTheme();
     const { id, moduleSlug } = useLocalSearchParams<{ id: string; moduleSlug?: string }>();
-
+    const scrollRef = React.useRef<ScrollView>(null);
     const { currentModule, setCurrentModule } = useCurrentModule();
     const { selectedLesson, navigation, loading, error, fetchLessonById, fetchNavigation, markAsViewed } = useLessons();
     const { exerciseData, fetchExercises } = useExerciseViewModel();
@@ -32,26 +32,26 @@ const LessonDetailScreen = () => {
     const [checkingExercises, setCheckingExercises] = useState(false);
 
     const colors = {
-        background:       isDark ? '#1B1D23' : '#EAF4FF',
-        card:             isDark ? '#272B35' : '#FFFFFF',
-        text:             isDark ? '#F9FAFB' : '#1F2937',
-        subtext:          isDark ? '#9CA3AF' : '#6B7280',
-        accent:           '#0099FF',
-        accentLight:      isDark ? '#1E3A5F' : '#DBEAFE',
-        accentLightText:  isDark ? '#93C5FD' : '#1E40AF',
-        breadcrumb:       isDark ? '#9CA3AF' : '#6B7280',
-        navPrevBg:        isDark ? '#374151' : '#E5E7EB',
-        navPrevText:      isDark ? '#F3F4F6' : '#1F2937',
-        navPrevSub:       isDark ? '#9CA3AF' : '#6B7280',
-        badgeEditorBg:    isDark ? '#1E3A5F' : '#DBEAFE',
-        badgeEditorText:  isDark ? '#93C5FD' : '#1E40AF',
-        badgeExBg:        isDark ? '#3B2A00' : '#FEF3C7',
-        badgeExText:      isDark ? '#FCD34D' : '#92400E',
-        htmlP:            isDark ? '#D1D5DB' : '#374151',
-        htmlH:            isDark ? '#F9FAFB' : '#1F2937',
-        htmlCode:         isDark ? '#E5E7EB' : '#1F2937',
-        htmlCodeBg:       isDark ? '#1F2937' : '#F3F4F6',
-        errorText:        isDark ? '#FCA5A5' : '#EF4444',
+        background: isDark ? '#1B1D23' : '#EAF4FF',
+        card: isDark ? '#272B35' : '#FFFFFF',
+        text: isDark ? '#F9FAFB' : '#1F2937',
+        subtext: isDark ? '#9CA3AF' : '#6B7280',
+        accent: '#0099FF',
+        accentLight: isDark ? '#1E3A5F' : '#DBEAFE',
+        accentLightText: isDark ? '#93C5FD' : '#1E40AF',
+        breadcrumb: isDark ? '#9CA3AF' : '#6B7280',
+        navPrevBg: isDark ? '#374151' : '#E5E7EB',
+        navPrevText: isDark ? '#F3F4F6' : '#1F2937',
+        navPrevSub: isDark ? '#9CA3AF' : '#6B7280',
+        badgeEditorBg: isDark ? '#1E3A5F' : '#DBEAFE',
+        badgeEditorText: isDark ? '#93C5FD' : '#1E40AF',
+        badgeExBg: isDark ? '#3B2A00' : '#FEF3C7',
+        badgeExText: isDark ? '#FCD34D' : '#92400E',
+        htmlP: isDark ? '#D1D5DB' : '#374151',
+        htmlH: isDark ? '#F9FAFB' : '#1F2937',
+        htmlCode: isDark ? '#E5E7EB' : '#1F2937',
+        htmlCodeBg: isDark ? '#1F2937' : '#F3F4F6',
+        errorText: isDark ? '#FCA5A5' : '#EF4444',
     };
 
     useEffect(() => {
@@ -65,6 +65,7 @@ const LessonDetailScreen = () => {
     }, [selectedLesson]);
 
     useEffect(() => {
+        scrollRef.current?.scrollTo({ y: 0, animated: false }); // ← resetear al cambiar lección
         if (id) {
             const lessonId = parseInt(id, 10);
             const slug = moduleSlug || currentModule?.slug;
@@ -77,7 +78,7 @@ const LessonDetailScreen = () => {
                     }
                 });
 
-            fetchNavigation(slug, lessonId).catch(() => {});
+            fetchNavigation(slug, lessonId).catch(() => { });
         }
     }, [id, moduleSlug]);
 
@@ -85,7 +86,7 @@ const LessonDetailScreen = () => {
         if (selectedLesson && selectedLesson.modulo.slug) {
             getModuleBySlug(selectedLesson.modulo.slug)
                 .then((module) => setCurrentModule(module))
-                .catch(() => {});
+                .catch(() => { });
         }
     }, [selectedLesson]);
 
@@ -138,6 +139,7 @@ const LessonDetailScreen = () => {
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
             <ScrollView
+                ref={scrollRef}
                 style={{ flex: 1 }}
                 contentContainerStyle={{ flexGrow: 1, paddingTop: 40 }}
                 showsVerticalScrollIndicator={false}
@@ -151,6 +153,7 @@ const LessonDetailScreen = () => {
                 <TopProgressHeader
                     title={selectedLesson.titulo}
                     activeSlug={selectedLesson.modulo.slug}
+                    mode="lesson"  // ← agregar esto
                 />
 
                 <WhiteScreenContainer>
@@ -182,12 +185,12 @@ const LessonDetailScreen = () => {
                                     .replace(/&quot;/g, '"')
                             }}
                             tagsStyles={{
-                                p:    { fontSize: 16, lineHeight: 24, color: colors.htmlP, marginBottom: 12 },
-                                h2:   { fontSize: 20, fontWeight: 'bold', marginTop: 16, marginBottom: 8, color: colors.htmlH },
-                                h3:   { fontSize: 18, fontWeight: 'bold', marginTop: 12, marginBottom: 6, color: colors.htmlH },
-                                ul:   { marginTop: 8, marginBottom: 12, paddingLeft: 20 },
-                                li:   { marginBottom: 4, lineHeight: 20, color: colors.htmlP },
-                                pre:  { backgroundColor: colors.htmlCodeBg, padding: 12, borderRadius: 8, marginBottom: 12 },
+                                p: { fontSize: 16, lineHeight: 24, color: colors.htmlP, marginBottom: 12 },
+                                h2: { fontSize: 20, fontWeight: 'bold', marginTop: 16, marginBottom: 8, color: colors.htmlH },
+                                h3: { fontSize: 18, fontWeight: 'bold', marginTop: 12, marginBottom: 6, color: colors.htmlH },
+                                ul: { marginTop: 8, marginBottom: 12, paddingLeft: 20 },
+                                li: { marginBottom: 4, lineHeight: 20, color: colors.htmlP },
+                                pre: { backgroundColor: colors.htmlCodeBg, padding: 12, borderRadius: 8, marginBottom: 12 },
                                 code: { fontFamily: 'monospace', fontSize: 14, color: colors.htmlCode },
                             }}
                             defaultTextProps={{ allowFontScaling: false }}
@@ -227,6 +230,7 @@ const LessonDetailScreen = () => {
                         {navigation?.anterior ? (
                             <TouchableOpacity
                                 onPress={() => {
+                                    scrollRef.current?.scrollTo({ y: 0, animated: false }); // ← agregar
                                     const slug = moduleSlug || currentModule?.slug;
                                     router.push({
                                         pathname: '/(tabs)/(drawer)/lesson/[id]',
@@ -258,6 +262,7 @@ const LessonDetailScreen = () => {
                         {navigation?.siguiente ? (
                             <TouchableOpacity
                                 onPress={() => {
+                                    scrollRef.current?.scrollTo({ y: 0, animated: false }); // ← agregar
                                     const slug = moduleSlug || currentModule?.slug;
                                     router.push({
                                         pathname: '/(tabs)/(drawer)/lesson/[id]',

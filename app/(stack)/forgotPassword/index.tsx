@@ -1,5 +1,6 @@
 import Button from '@/components/shared/button';
 import Input from '@/components/shared/input';
+import { useTheme } from '@/src/context/ThemeContext';
 import { useForgotPasswordViewModel } from '@/src/viewmodels/ForgotPasswordViewModel';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -9,12 +10,23 @@ const CarruselScreen = () => {
   const { loading, error, success, sendResetEmail } = useForgotPasswordViewModel();
   const [email, setEmail] = useState("");
   const [localError, setLocalError] = useState("");
+  const { isDark } = useTheme();
+
+  const colors = {
+    background: isDark ? '#111827' : '#F3F4F6',
+    card: isDark ? '#1B1D23' : '#FFFFFF',
+    text: isDark ? '#FFFFFF' : '#111827',
+    subtext: isDark ? '#D1D5DB' : '#6B7280',
+    border: isDark ? '#374151' : '#E5E7EB',
+  };
+
+  const mostrarAlerta = (titulo: string, mensaje: string, onPress?: () => void) => {
+    Alert.alert(titulo, mensaje, [{ text: 'Aceptar', onPress }]);
+  };
 
   const handleSend = async () => {
-    // Limpiar errores previos
     setLocalError("");
 
-    // Validación básica del correo
     const regex = /\S+@\S+\.\S+/;
     if (!regex.test(email)) {
       setLocalError("Por favor ingresa un correo válido.");
@@ -23,28 +35,21 @@ const CarruselScreen = () => {
 
     try {
       await sendResetEmail(email);
-
-      // Si fue exitoso, mostrar alerta y redirigir
-      Alert.alert(
+      mostrarAlerta(
         'Correo enviado',
         'Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.',
-        [
-          {
-            text: 'Entendido',
-            onPress: () => router.push('/(stack)/confirmed')
-          }
-        ]
+        () => router.push('/(stack)/confirmed')
       );
-
     } catch (err: any) {
       setLocalError(err?.response?.data?.message || err.message || 'No se pudo enviar el correo');
     }
   };
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 16 }}>
+    <View style={{ flex: 1, paddingHorizontal: 16, backgroundColor: colors.background }}>
+
       {/* LOGO */}
-      <View className="justify-center items-center mt-6">
+      <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 24 }}>
         <Image
           style={{ width: 200, resizeMode: 'contain' }}
           source={require('../../../assets/images/logo2.png')}
@@ -52,24 +57,44 @@ const CarruselScreen = () => {
       </View>
 
       {/* IMAGEN */}
-      <View className="justify-center items-center mt-10">
+      <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 40 }}>
         <Image
           style={{ width: 280, height: 280, resizeMode: 'contain' }}
           source={require('../../../assets/images/olvidar-contraseña.png')}
         />
       </View>
 
-      {/* TEXTO */}
-      <View className="bg-white rounded-3xl p-6 mt-4 border border-secondary-100/10 mx-2">
-        <Text className="font-barlow-bold text-center mb-3 text-3xl">
+      {/* CARD */}
+      <View style={{
+        backgroundColor: colors.card,
+        borderRadius: 24,
+        padding: 24,
+        marginTop: 16,
+        marginHorizontal: 8,
+        borderWidth: 1,
+        borderColor: colors.border
+      }}>
+        <Text style={{
+          fontFamily: 'Barlow-Bold',
+          textAlign: 'center',
+          marginBottom: 12,
+          fontSize: 28,
+          color: colors.text
+        }}>
           ¿Olvidaste tu contraseña?
         </Text>
-        <Text className="text-secondary-100 font-barlow-medium text-center text-lg">
+        <Text style={{
+          fontFamily: 'Barlow-Medium',
+          textAlign: 'center',
+          fontSize: 16,
+          color: colors.subtext,
+          marginBottom: 16
+        }}>
           Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
         </Text>
-        
+
         <Input
-          className='m-2'
+          isDark={isDark}
           value={email}
           onChangeText={setEmail}
           placeholder="Escribe tu correo"
@@ -79,32 +104,38 @@ const CarruselScreen = () => {
           editable={!loading}
         />
 
-        {/* MENSAJE DE ÉXITO */}
         {success && (
-          <View className='bg-green-100 p-4 rounded-lg mt-2'>
-            <Text className='font-barlow-medium text-green-800 text-center'>
+          <View style={{
+            backgroundColor: isDark ? '#064E3B' : '#D1FAE5',
+            padding: 16,
+            borderRadius: 8,
+            marginTop: 8
+          }}>
+            <Text style={{
+              fontFamily: 'Barlow-Medium',
+              color: isDark ? '#6EE7B7' : '#065F46',
+              textAlign: 'center'
+            }}>
               ✓ Correo enviado exitosamente
             </Text>
           </View>
         )}
       </View>
 
+      {/* BOTONES */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
-        {/* BOTÓN REGRESAR */}
-        <View style={{ flex: 1, marginLeft: 6, margin: 5 }}>
-          <Button 
-            className="h-14 justify-center color-secondary-100" 
+        <View style={{ flex: 1, margin: 5, marginLeft: 6 }}>
+          <Button
+            className="h-14 justify-center"
             onPress={() => router.back()}
             disabled={loading}
           >
             Regresar
           </Button>
         </View>
-
-        {/* BOTÓN CONTINUAR */}
-        <View style={{ flex: 1, marginRight: 6, margin: 5 }}>
-          <Button 
-            className="h-14 justify-center" 
+        <View style={{ flex: 1, margin: 5, marginRight: 6 }}>
+          <Button
+            className="h-14 justify-center"
             onPress={handleSend}
             disabled={loading || !email}
           >

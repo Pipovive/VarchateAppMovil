@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const UserEditScreen = () => {
-  const { user, loading, error, changePassword, updateProfile, logout, deleteAccount, fetchUser } = useUserViewModel();
+  const { user, loading, error, changePassword, updateProfile, logout, deleteAccount, fetchUser, } = useUserViewModel();
   const { isDark, toggleTheme } = useTheme();
 
   const colors = {
@@ -20,7 +20,9 @@ const UserEditScreen = () => {
     subtext: isDark ? '#D1D5DB' : '#6B7280',
     border: isDark ? '#555555' : '#E5E7EB',
     icon: isDark ? '#FFFFFF' : '#000000',
-    inputsColor: isDark ? '#616461' : '#FFFFFF'
+    inputsColor: isDark ? '#616461' : '#FFFFFF',
+    ruleBg: isDark ? '#1F2937' : '#F9FAFB',
+    ruleBorder: isDark ? '#374151' : '#E5E7EB',
   };
 
   const [nombre, setNombre] = useState('');
@@ -28,16 +30,43 @@ const UserEditScreen = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePasswordInput, setDeletePasswordInput] = useState('');
+
+  // FIX 1: detectar si es usuario de Google
+  const esGoogleUser = (user as any)?.proveedor_auth === 'google';
+
+  const passwordRules = [
+    { label: 'Mínimo 8 caracteres', valid: newPassword.length >= 8 },
+    { label: 'Una letra mayúscula', valid: /[A-Z]/.test(newPassword) },
+    { label: 'Una letra minúscula', valid: /[a-z]/.test(newPassword) },
+    { label: 'Un número', valid: /[0-9]/.test(newPassword) },
+  ];
+  const passwordValid = passwordRules.every(r => r.valid);
+
+  const mostrarAlerta = (titulo: string, mensaje: string, onPress?: () => void) => {
+    Alert.alert(titulo, mensaje, [{ text: 'Aceptar', onPress }]);
+  };
+
+    useEffect(() => {
+    if (user) {
+      console.log('👤 User data:', JSON.stringify(user));
+      setNombre(user.nombre);
+      setAvatarId(user.avatar_id ?? 1);
+    }
+  }, [user]);
 
   useEffect(() => { fetchUser(); }, []);
 
   useEffect(() => {
     if (user) {
       setNombre(user.nombre);
-      setAvatarId(user.avatar_id);
+      // FIX 3: fallback a 1 si avatar_id es null
+      setAvatarId(user.avatar_id ?? 1);
     }
   }, [user]);
 
@@ -47,7 +76,7 @@ const UserEditScreen = () => {
       await updateProfile(nombre, id);
       await fetchUser();
     } catch {
-      Alert.alert('Error', 'No se pudo guardar el avatar');
+      mostrarAlerta('Error', 'No se pudo guardar el avatar');
     }
   };
 
@@ -58,17 +87,18 @@ const UserEditScreen = () => {
 
       if (nombre !== user?.nombre || avatarId !== user?.avatar_id) {
         if (!nombre || nombre.trim() === '') {
-          Alert.alert('Error', 'El nombre no puede estar vacío');
+          mostrarAlerta('Error', 'El nombre no puede estar vacío');
           return;
         }
         await updateProfile(nombre, avatarId);
         profileUpdated = true;
       }
 
-      if (currentPassword || newPassword || confirmPassword) {
-        if (!currentPassword) { Alert.alert('Error', 'Debes ingresar tu contraseña actual'); return; }
-        if (!newPassword) { Alert.alert('Error', 'Debes ingresar una nueva contraseña'); return; }
-        if (newPassword !== confirmPassword) { Alert.alert('Error', 'Las contraseñas no coinciden'); return; }
+      if (!esGoogleUser && (currentPassword || newPassword || confirmPassword)) {
+        if (!currentPassword) { mostrarAlerta('Error', 'Debes ingresar tu contraseña actual'); return; }
+        if (!newPassword) { mostrarAlerta('Error', 'Debes ingresar una nueva contraseña'); return; }
+        if (!passwordValid) { mostrarAlerta('Error', 'La contraseña no cumple los requisitos'); return; }
+        if (newPassword !== confirmPassword) { mostrarAlerta('Error', 'Las contraseñas no coinciden'); return; }
 
         await changePassword(currentPassword, newPassword, confirmPassword);
         passwordUpdated = true;
@@ -78,19 +108,23 @@ const UserEditScreen = () => {
       }
 
       if (profileUpdated && passwordUpdated) {
-        Alert.alert('Éxito', 'Perfil y contraseña actualizados correctamente');
+        mostrarAlerta('Éxito', 'Perfil y contraseña actualizados correctamente');
       } else if (profileUpdated) {
-        Alert.alert('Éxito', 'Perfil actualizado correctamente');
+        mostrarAlerta('Éxito', 'Perfil actualizado correctamente');
       } else if (passwordUpdated) {
-        Alert.alert('Éxito', 'Contraseña actualizada correctamente');
+        mostrarAlerta('Éxito', 'Contraseña actualizada correctamente');
       } else {
-        Alert.alert('Información', 'No hay cambios que guardar');
+        mostrarAlerta('Información', 'No hay cambios que guardar');
         return;
       }
 
       router.push('/(tabs)/(stack)/profile');
     } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || err.message || 'Error al guardar cambios');
+      // FIX 2: limpiar campos de contraseña para no bloquear la pantalla
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      mostrarAlerta('Error', err?.response?.data?.message || err.message || 'Error al guardar cambios');
     }
   };
 
@@ -117,7 +151,7 @@ const UserEditScreen = () => {
   const confirmDeleteAccount = async () => {
     try {
       if (!deletePasswordInput?.trim()) {
-        Alert.alert('Error', 'Debes ingresar tu contraseña');
+        mostrarAlerta('Error', 'Debes ingresar tu contraseña');
         return;
       }
       await deleteAccount(deletePasswordInput);
@@ -127,7 +161,7 @@ const UserEditScreen = () => {
         { text: 'Entendido', onPress: () => router.replace('/(stack)/login') }
       ]);
     } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || err.message || 'No se pudo eliminar la cuenta');
+      mostrarAlerta('Error', err?.response?.data?.message || err.message || 'No se pudo eliminar la cuenta');
     }
   };
 
@@ -159,13 +193,17 @@ const UserEditScreen = () => {
 
       {/* Avatar */}
       <View style={{ alignItems: 'center', marginBottom: 16 }}>
-        <Image source={AVATARS[avatarId]} style={{ width: 160, height: 160, resizeMode: 'contain', borderRadius: 80, marginTop: 6 }} />
+        {/* FIX 3: fallback a AVATARS[1] si avatarId es null/undefined */}
+        <Image
+          source={avatarId && AVATARS[avatarId] ? AVATARS[avatarId] : AVATARS[1]}
+          style={{ width: 160, height: 160, resizeMode: 'contain', borderRadius: 80, marginTop: 6 }}
+        />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '33%', marginTop: 12 }}>
           <TouchableOpacity
             onPress={async () => {
               setAvatarId(1);
               try { await updateProfile(nombre, 1); await fetchUser(); }
-              catch { Alert.alert('Error', 'No se pudo resetear el avatar'); }
+              catch { mostrarAlerta('Error', 'No se pudo resetear el avatar'); }
             }}
             disabled={avatarId === 1}
             style={{ opacity: avatarId === 1 ? 0.5 : 1 }}
@@ -186,21 +224,79 @@ const UserEditScreen = () => {
           <Input isDark={isDark} label='Correo' placeholder={user?.email || 'correo@ejemplo.com'}
             value={user?.email || ''} editable={false} keyboardType='email-address' autoCapitalize='none' />
 
-          <Text style={{ fontFamily: 'Barlow-Medium', marginTop: 24, fontSize: 16, color: colors.text }}>
-            Cambiar contraseña (opcional)
-          </Text>
+          {/* FIX 1: solo mostrar cambio de contraseña si NO es Google */}
+          {!esGoogleUser && (
+            <>
+              <Text style={{ fontFamily: 'Barlow-Medium', marginTop: 24, fontSize: 16, color: colors.text }}>
+                Cambiar contraseña (opcional)
+              </Text>
 
-          <Input isDark={isDark} label='Contraseña Actual' placeholder='Ingresa tu contraseña actual'
-            value={currentPassword} secureTextEntry onChangeText={setCurrentPassword} />
-          <Input isDark={isDark} label='Nueva contraseña' placeholder='Mínimo 8 caracteres con carácter especial'
-            value={newPassword}
-            error={newPassword.length > 0 && newPassword.length < 8 ? 'Mínimo 8 caracteres'
-              : newPassword.length > 0 && !/[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? 'Debe incluir un carácter especial' : ''}
-            secureTextEntry onChangeText={setNewPassword} />
-          <Input isDark={isDark}  label='Confirmar nueva contraseña' placeholder='Repite la nueva contraseña'
-            value={confirmPassword}
-            error={confirmPassword && newPassword !== confirmPassword ? 'Las contraseñas no coinciden' : ''}
-            secureTextEntry onChangeText={setConfirmPassword} />
+              {/* Contraseña actual con ojito */}
+              <View style={{ position: 'relative' }}>
+                <Input isDark={isDark} label='Contraseña Actual' placeholder='Ingresa tu contraseña actual'
+                  value={currentPassword} secureTextEntry={!showCurrentPassword} onChangeText={setCurrentPassword} />
+                <TouchableOpacity onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                  style={{ position: 'absolute', right: 16, top: 38 }}>
+                  <Ionicons name={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isDark ? '#9CA3AF' : '#6B7280'} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Nueva contraseña con ojito */}
+              <View style={{ position: 'relative' }}>
+                <Input isDark={isDark} label='Nueva contraseña' placeholder='Mínimo 8 caracteres'
+                  value={newPassword} secureTextEntry={!showNewPassword} onChangeText={setNewPassword} />
+                <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}
+                  style={{ position: 'absolute', right: 16, top: 38 }}>
+                  <Ionicons name={showNewPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isDark ? '#9CA3AF' : '#6B7280'} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Indicador de requisitos */}
+              {newPassword.length > 0 && (
+                <View style={{
+                  backgroundColor: colors.ruleBg,
+                  borderRadius: 8, padding: 12, marginBottom: 12,
+                  borderWidth: 1, borderColor: colors.ruleBorder
+                }}>
+                  {passwordRules.map((rule, i) => (
+                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: i < passwordRules.length - 1 ? 6 : 0 }}>
+                      <Text style={{ fontSize: 13, marginRight: 8 }}>{rule.valid ? '✅' : '⭕'}</Text>
+                      <Text style={{ fontSize: 13, fontFamily: 'Barlow-Medium', color: rule.valid ? '#10B981' : colors.subtext }}>
+                        {rule.label}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Confirmar contraseña con ojito */}
+              <View style={{ position: 'relative' }}>
+                <Input isDark={isDark} label='Confirmar nueva contraseña' placeholder='Repite la nueva contraseña'
+                  value={confirmPassword}
+                  error={confirmPassword && newPassword !== confirmPassword ? 'Las contraseñas no coinciden' : ''}
+                  secureTextEntry={!showConfirmPassword} onChangeText={setConfirmPassword} />
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ position: 'absolute', right: 16, top: 38 }}>
+                  <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isDark ? '#9CA3AF' : '#6B7280'} />
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+
+          {/* Mensaje informativo para usuarios de Google */}
+          {esGoogleUser && (
+            <View style={{
+              backgroundColor: isDark ? '#1F2937' : '#EFF6FF',
+              borderRadius: 8, padding: 12, marginTop: 16,
+              borderWidth: 1, borderColor: isDark ? '#374151' : '#BFDBFE',
+              flexDirection: 'row', alignItems: 'center', gap: 8
+            }}>
+              <Ionicons name='logo-google' size={18} color='#4285F4' />
+              <Text style={{ fontFamily: 'Barlow-Medium', fontSize: 13, color: isDark ? '#93C5FD' : '#1D4ED8', flex: 1 }}>
+                Tu cuenta usa Google. La contraseña se gestiona desde tu cuenta de Google.
+              </Text>
+            </View>
+          )}
         </View>
 
         <Button color='primary' className='mt-8' onPress={handleSaveChanges}>
@@ -226,25 +322,41 @@ const UserEditScreen = () => {
         <Text style={{ fontFamily: 'Barlow-Medium', marginTop: 40, fontSize: 16, color: colors.text }}>
           Conoce más sobre nosotros
         </Text>
-        <View style={{ backgroundColor: colors.card, alignItems: 'center', borderRadius: 8, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', marginTop: 8, paddingHorizontal: 8 }}>
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/(stack)/termos')}
+          style={{ backgroundColor: colors.card, alignItems: 'center', borderRadius: 8, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', marginTop: 8, paddingHorizontal: 12, paddingVertical: 14 }}
+        >
           <Ionicons name='document-text-outline' size={23} color={colors.icon} />
-          <Button variant='text-only' textColor='normal'>Términos y Condiciones</Button>
-        </View>
-        <View style={{ backgroundColor: colors.card, alignItems: 'center', borderRadius: 8, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', marginTop: 4, paddingHorizontal: 8 }}>
+          <Text style={{ fontFamily: 'Barlow-Medium', fontSize: 15, color: colors.text, marginLeft: 10 }}>
+            Términos y Condiciones
+          </Text>
+          <Ionicons name='chevron-forward' size={18} color={colors.subtext} style={{ marginLeft: 'auto' }} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/(stack)/privacy')}
+          style={{ backgroundColor: colors.card, alignItems: 'center', borderRadius: 8, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', marginTop: 4, paddingHorizontal: 12, paddingVertical: 14 }}
+        >
           <Feather name='lock' size={21} color={colors.icon} />
-          <Button variant='text-only' textColor='normal'>Política de Privacidad</Button>
-        </View>
+          <Text style={{ fontFamily: 'Barlow-Medium', fontSize: 15, color: colors.text, marginLeft: 10 }}>
+            Política de Privacidad
+          </Text>
+          <Ionicons name='chevron-forward' size={18} color={colors.subtext} style={{ marginLeft: 'auto' }} />
+        </TouchableOpacity>
 
         {/* Gestionar cuenta */}
         <Text style={{ fontFamily: 'Barlow-Medium', marginTop: 32, fontSize: 16, color: colors.text }}>
           Gestionar cuenta
         </Text>
-        <View style={{ backgroundColor: colors.card, alignItems: 'center', borderRadius: 8, flexDirection: 'row', marginTop: 4, paddingHorizontal: 8 }}>
+        <TouchableOpacity
+          onPress={handleDeleteAccount}
+          disabled={loading}
+          style={{ backgroundColor: colors.card, alignItems: 'center', borderRadius: 8, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', marginTop: 4, paddingHorizontal: 12, paddingVertical: 14 }}
+        >
           <FontAwesome5 name='trash-alt' size={19} color='#D64545' />
-          <Button variant='text-only' textColor='normal' onPress={handleDeleteAccount} disabled={loading}>
+          <Text style={{ fontFamily: 'Barlow-Medium', fontSize: 15, color: '#D64545', marginLeft: 10 }}>
             Eliminar cuenta
-          </Button>
-        </View>
+          </Text>
+        </TouchableOpacity>
 
         <Button color='tertiary' className='mt-10 mb-6' onPress={handleLogout} disabled={loading}>
           {loading ? 'Cerrando sesión...' : 'Cerrar sesión'}
