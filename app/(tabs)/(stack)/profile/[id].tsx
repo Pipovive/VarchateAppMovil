@@ -52,7 +52,7 @@ const UserEditScreen = () => {
     Alert.alert(titulo, mensaje, [{ text: 'Aceptar', onPress }]);
   };
 
-    useEffect(() => {
+  useEffect(() => {
     if (user) {
       console.log('👤 User data:', JSON.stringify(user));
       setNombre(user.nombre);
@@ -144,10 +144,26 @@ const UserEditScreen = () => {
   const handleDeleteAccount = () => {
     Alert.alert('⚠️ Eliminar cuenta', 'Esta acción es permanente. ¿Estás seguro?', [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Eliminar', style: 'destructive', onPress: () => setShowDeleteModal(true) }
+      {
+        text: 'Eliminar', style: 'destructive',
+        onPress: async () => {
+          if (esGoogleUser) {
+            // ← directo sin pedir contraseña
+            try {
+              await deleteAccount('');
+              Alert.alert('Cuenta eliminada', 'Tu cuenta ha sido eliminada', [
+                { text: 'Entendido', onPress: () => router.replace('/(stack)/login') }
+              ]);
+            } catch (err: any) {
+              mostrarAlerta('Error', err?.response?.data?.message || 'No se pudo eliminar la cuenta');
+            }
+          } else {
+            setShowDeleteModal(true); // ← pide contraseña normal
+          }
+        }
+      }
     ]);
   };
-
   const confirmDeleteAccount = async () => {
     try {
       if (!deletePasswordInput?.trim()) {

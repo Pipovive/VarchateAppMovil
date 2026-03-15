@@ -37,8 +37,8 @@
       ],
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/indefinido.png",
-        "backgroundImage": "./assets/images/indefinido.png",
+        "foregroundImage": "./assets/images/Logo-icono1.png",
+        "backgroundImage": "./assets/images/foregorund.png",
         "monochromeImage": "./assets/images/indefinidoBlank.png"
       },
       "edgeToEdgeEnabled": true,
@@ -53,9 +53,17 @@
       "expo-router",
       "@react-native-google-signin/google-signin",
       [
+        "expo-media-library",
+        {
+          "photosPermission": "Permitir acceso a fotos para guardar certificados.",
+          "savePhotosPermission": "Permitir guardar certificados en tu galería.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash.png",
+          "image": "./assets/images/icon2.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

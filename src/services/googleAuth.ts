@@ -10,6 +10,12 @@ export const signInWithGoogle = async () => {
     await GoogleSignin.hasPlayServices();
     await GoogleSignin.signOut();
     const userInfo = await GoogleSignin.signIn();
+    
+    // ← Obtener el access token, no solo el idToken
+    const tokens = await GoogleSignin.getTokens();
+    console.log('🔑 accessToken:', tokens.accessToken ? 'SÍ' : 'NO');
+    console.log('🔑 idToken:', userInfo.data?.idToken ? 'SÍ' : 'NO');
+    
     return userInfo;
   } catch (error: any) {
     if (error.code === statusCodes.SIGN_IN_CANCELLED) {

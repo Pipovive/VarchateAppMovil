@@ -9,7 +9,7 @@ import axios from 'axios';
 // casa lina 192.168.20.27
 // 10.32.22.221
 // 10.32.23.100
-const BASE_URL = "https://api-varchate-v1-production.up.railway.app/api";
+export const BASE_URL = "https://api-varchate-v1-production.up.railway.app/api";
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -115,5 +115,7 @@ export const getMisCertificaciones = async () => {
   const response = await api.get('/certificaciones');
   return response.data;
 };
+
+
 
 export default api;

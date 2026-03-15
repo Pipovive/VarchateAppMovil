@@ -129,29 +129,26 @@ export const useUserViewModel = () => {
         }
     };
 
-    const deleteAccount = async (password: string) => {
+    const deleteAccount = async (password?: string) => {
         try {
-            console.log('🔴 Intentando eliminar cuenta con password:', password ? '***' : 'VACÍO');
             setLoading(true);
             setError(null);
 
-            if (!password || password.trim() === '') {
+            // Si es cuenta Google no requiere contraseña
+            const isGoogleAccount = user?.proveedor_auth === 'google';
+
+            if (!isGoogleAccount && (!password || password.trim() === '')) {
                 throw new Error('Debes ingresar tu contraseña para eliminar la cuenta');
             }
 
-            // Llamar al endpoint de eliminación
-            await deleteAccountService(password);
+            await deleteAccountService(isGoogleAccount ? '' : password!);
 
-            // Limpiar token y estado
             await AsyncStorage.removeItem('token');
             setUser(null);
-
             return true;
 
         } catch (err: any) {
-            console.log('❌ Error completo:', error);
-            console.log('❌ Error response:', error);
-            console.log('❌ Error status:', error);
+            console.log('❌ Error eliminando cuenta:', err);
             throw err;
         } finally {
             setLoading(false);

@@ -81,8 +81,7 @@ export const forgotPassword = async (email) => {
 
 export const loginWithGoogle = async (googleToken) => {
     const response = await api.post('/auth/google', {
-        token: googleToken
+        id_token: googleToken  // ← usar el parámetro correcto
     });
-
     return response.data;
 };

@@ -1,6 +1,8 @@
 import { BASE_URL } from '@/src/api/api';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as MediaLibrary from 'expo-media-library';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -19,6 +21,7 @@ const CertificadoScreen = () => {
     const [imageLoading, setImageLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [descargando, setDescargando] = useState(false);
     const router = useRouter();
     const { codigo, modulo, porcentaje, fecha } = useLocalSearchParams<{
         codigo: string;
@@ -28,21 +31,56 @@ const CertificadoScreen = () => {
     }>();
     const insets = useSafeAreaInsets();
     const [imageError, setImageError] = useState(false);
-    const urlImagen = `${BASE_URL}/api/certificaciones/${codigo}/ver`;
-    const urlDescargar = `${BASE_URL}/api/certificaciones/${codigo}/descargar`;
+    const urlImagen = `${BASE_URL}/certificaciones/${codigo}/ver`;
+    const urlDescargar = `${BASE_URL}/certificaciones/${codigo}/descargar`;
 
     useEffect(() => {
         const loadToken = async () => {
             const storedToken = await AsyncStorage.getItem('token');
-            console.log('🔑 Token cargado:', storedToken ? 'SÍ' : 'NO');
             setToken(storedToken);
             setLoading(false);
         };
         loadToken();
     }, []);
 
-    const handleDescargar = () => {
-        Alert.alert('Próximamente', 'La descarga estará disponible pronto.');
+    const handleDescargar = async () => {
+        if (!token) {
+            Alert.alert('Error', 'No se pudo obtener el token de autenticación.', [{ text: 'Aceptar' }]);
+            return;
+        }
+
+        try {
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permiso denegado', 'Necesitamos acceso a tu galería para guardar el certificado.', [{ text: 'Aceptar' }]);
+                return;
+            }
+
+            setDescargando(true);
+
+            const fileUri = `${FileSystem.cacheDirectory}certificado-${codigo}.jpg`;
+
+            const downloadResult = await FileSystem.downloadAsync(
+                urlDescargar,
+                fileUri,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (downloadResult.status !== 200) {
+                Alert.alert('Error', 'No se pudo descargar el certificado.', [{ text: 'Aceptar' }]);
+                return;
+            }
+
+            const asset = await MediaLibrary.createAssetAsync(downloadResult.uri);
+            await MediaLibrary.createAlbumAsync('Certificados', asset, false);
+
+            Alert.alert('✅ Guardado', 'Certificado guardado en tu galería en el álbum "Certificados".', [{ text: 'Aceptar' }]);
+        } catch (err) {
+            console.error('❌ Error descargando:', err);
+            Alert.alert('Error', 'No se pudo descargar el certificado.', [{ text: 'Aceptar' }]);
+        } finally {
+            setDescargando(false);
+        }
     };
 
     const handleCompartir = () => {
@@ -50,6 +88,7 @@ const CertificadoScreen = () => {
             Alert.alert('Error', 'No se pudo abrir el certificado.')
         );
     };
+
     if (loading) {
         return (
             <View style={{ flex: 1, backgroundColor: '#0A1628', paddingTop: insets.top }}>
@@ -106,12 +145,8 @@ const CertificadoScreen = () => {
                                 style={{ width: '100%', height: 220 }}
                                 resizeMode="contain"
                                 onLoadStart={() => setImageLoading(true)}
-                                onLoad={() => {
-                                    console.log('✅ Imagen cargada correctamente');
-                                    setImageLoading(false);
-                                }}
-                                onError={(e) => {
-                                    console.error('❌ Error cargando imagen:', e.nativeEvent.error);
+                                onLoad={() => setImageLoading(false)}
+                                onError={() => {
                                     setImageLoading(false);
                                     setImageError(true);
                                 }}
@@ -135,11 +170,15 @@ const CertificadoScreen = () => {
                 <View style={{ gap: 12 }}>
                     <TouchableOpacity
                         onPress={handleDescargar}
-                        style={{ backgroundColor: '#10B981', paddingVertical: 16, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                        disabled={descargando}
+                        style={{ backgroundColor: descargando ? '#6B7280' : '#10B981', paddingVertical: 16, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
                     >
-                        <Ionicons name="download" size={20} color="#FFFFFF" />
+                        {descargando
+                            ? <ActivityIndicator size="small" color="#FFFFFF" />
+                            : <Ionicons name="download" size={20} color="#FFFFFF" />
+                        }
                         <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 16, fontFamily: 'Barlow-Bold' }}>
-                            Descargar Certificado
+                            {descargando ? 'Descargando...' : 'Descargar Certificado'}
                         </Text>
                     </TouchableOpacity>
 

@@ -8,7 +8,7 @@ import { useUserViewModel } from '@/src/viewmodels/UserViewModel';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
 interface LaravelValidationError {
@@ -75,6 +75,15 @@ const LoginScreen = () => {
           return;
         }
         if (error.response?.status === 401) {
+          // ← Detectar cuenta Google
+          if (error.response.data?.message?.includes('Google')) {
+            Alert.alert(
+              '🔐 Cuenta de Google',
+              'Esta cuenta fue registrada con Google. Por favor inicia sesión con el botón de Gmail.',
+              [{ text: 'Entendido' }]
+            );
+            return;
+          }
           mostrarAlerta('Correo o contraseña incorrectos.');
           return;
         }
@@ -108,6 +117,7 @@ const LoginScreen = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <>
